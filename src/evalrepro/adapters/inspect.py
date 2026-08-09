@@ -50,7 +50,7 @@ def inspect_source(
         raise AdapterError(f"Loaded symbol {task_spec!r} is not callable.")
     try:
         task = task_factory(**task_kwargs)
-    except Exception as exc:  # noqa: BLE001 - framework errors need user-facing context
+    except Exception as exc:
         raise AdapterError(f"Inspect task {task_spec!r} could not be created: {exc}") from exc
 
     dataset = getattr(task, "dataset", None)

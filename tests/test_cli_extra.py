@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from evalrepro.adapters.base import SnapshotSource
 from evalrepro import cli
+from evalrepro.adapters.base import SnapshotSource
 
 
 def test_parser_helpers() -> None:

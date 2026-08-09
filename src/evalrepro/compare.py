@@ -4,14 +4,14 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import asdict, dataclass
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
 from evalrepro.manifest import read_manifest
 
 
-class Verdict(str, Enum):
+class Verdict(StrEnum):
     REPRODUCIBLE = "reproducible"
     ORDER_DRIFT = "order_drift"
     SEMANTIC_DRIFT = "semantic_drift"
@@ -46,7 +46,7 @@ class Comparison:
 
 
 def _first_mismatch(left: list[str], right: list[str]) -> int | None:
-    for index, (left_hash, right_hash) in enumerate(zip(left, right)):
+    for index, (left_hash, right_hash) in enumerate(zip(left, right, strict=False)):
         if left_hash != right_hash:
             return index
     if len(left) != len(right):

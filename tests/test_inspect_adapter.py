@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from typing import ClassVar
 
 from evalrepro.adapters import inspect as inspect_adapter
 from evalrepro.manifest import build_manifest
@@ -9,8 +10,8 @@ from evalrepro.manifest import build_manifest
 class FakeTask:
     name = "fake-task"
     version = "1.2.3"
-    metadata = {"purpose": "test"}
-    dataset = [
+    metadata: ClassVar[dict[str, str]] = {"purpose": "test"}
+    dataset: ClassVar[list[dict[str, object]]] = [
         {
             "id": "sample-1",
             "input": {"id": "volatile-message", "role": "user", "content": "hello"},

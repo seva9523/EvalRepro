@@ -58,7 +58,7 @@ def test_scalar_and_structured_special_types(tmp_path: Path) -> None:
             "decimal": Decimal("1.20"),
             "date": dt.date(2026, 8, 9),
             "time": dt.time(12, 30),
-            "datetime": dt.datetime(2026, 8, 9, 12, 30, tzinfo=dt.timezone.utc),
+            "datetime": dt.datetime(2026, 8, 9, 12, 30, tzinfo=dt.UTC),
             "uuid": UUID("12345678-1234-5678-1234-567812345678"),
             "enum": Colour.RED,
             "path": path,
