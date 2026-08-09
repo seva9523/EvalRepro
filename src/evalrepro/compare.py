@@ -73,22 +73,16 @@ def compare_manifest_data(left: dict[str, Any], right: dict[str, Any]) -> Compar
 
     ordered_match = left_samples["ordered_digest"] == right_samples["ordered_digest"]
     unordered_match = left_samples["unordered_digest"] == right_samples["unordered_digest"]
-    types_match = (
-        left_samples["top_level_type_summary"] == right_samples["top_level_type_summary"]
-    )
+    types_match = left_samples["top_level_type_summary"] == right_samples["top_level_type_summary"]
 
-    fields = sorted(
-        set(left_samples["field_digests"]) | set(right_samples["field_digests"])
-    )
+    fields = sorted(set(left_samples["field_digests"]) | set(right_samples["field_digests"]))
     field_matches: dict[str, dict[str, bool]] = {}
     for field in fields:
         left_field = left_samples["field_digests"].get(field)
         right_field = right_samples["field_digests"].get(field)
         field_matches[field] = {
             "ordered": bool(
-                left_field
-                and right_field
-                and left_field["ordered"] == right_field["ordered"]
+                left_field and right_field and left_field["ordered"] == right_field["ordered"]
             ),
             "unordered": bool(
                 left_field and right_field and left_field["unordered"] == right_field["unordered"]

@@ -86,9 +86,7 @@ def build_manifest(source: SnapshotSource, sample_limit: int | None = None) -> d
 
     return {
         "manifest_schema_version": MANIFEST_SCHEMA_VERSION,
-        "generated_at_utc": dt.datetime.now(dt.timezone.utc)
-        .replace(microsecond=0)
-        .isoformat(),
+        "generated_at_utc": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(),
         "tool": {"name": "evalrepro", "version": __version__},
         "runtime": runtime,
         "scope": scope,

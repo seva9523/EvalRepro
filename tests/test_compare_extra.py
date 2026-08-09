@@ -29,7 +29,5 @@ def test_complete_unknown_declared_count_can_match_known_count() -> None:
     left_source.declared_count = None
     right_source = _source([{"input": "a"}], ("input",))
 
-    result = compare_manifest_data(
-        build_manifest(left_source), build_manifest(right_source)
-    )
+    result = compare_manifest_data(build_manifest(left_source), build_manifest(right_source))
     assert result.reproducible

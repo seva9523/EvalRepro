@@ -81,11 +81,7 @@ def test_type_summary_covers_json_types() -> None:
         (
             lambda value: {
                 **value,
-                "scope": {
-                    key: item
-                    for key, item in value["scope"].items()
-                    if key != "adapter"
-                },
+                "scope": {key: item for key, item in value["scope"].items() if key != "adapter"},
             },
             "missing scope fields",
         ),

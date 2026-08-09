@@ -58,9 +58,7 @@ def build_parser() -> argparse.ArgumentParser:
     jsonl.add_argument("source", type=Path)
     jsonl.add_argument("--output", "-o", type=Path, required=True)
     jsonl.add_argument("--name", default="jsonl-evaluation")
-    jsonl.add_argument(
-        "--fields", type=_fields, default=("input", "target", "choices", "metadata")
-    )
+    jsonl.add_argument("--fields", type=_fields, default=("input", "target", "choices", "metadata"))
     jsonl.add_argument("--id-field", default="id")
     jsonl.add_argument("--limit", type=_positive_limit)
 

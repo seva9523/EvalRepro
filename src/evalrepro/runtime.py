@@ -61,7 +61,5 @@ def git_state(root: Path | None) -> dict[str, Any]:
         return {"git_commit": None, "tracked_diff_digest": None}
     return {
         "git_commit": commit.stdout.strip(),
-        "tracked_diff_digest": hashlib.sha256(
-            tracked_diff.stdout.encode("utf-8")
-        ).hexdigest(),
+        "tracked_diff_digest": hashlib.sha256(tracked_diff.stdout.encode("utf-8")).hexdigest(),
     }
