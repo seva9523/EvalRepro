@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import importlib
-from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -46,7 +45,7 @@ def inspect_source(
     """Materialise the dataset exposed by an Inspect task factory."""
     task_kwargs = kwargs or {}
     module, task_factory = _load_symbol(task_spec)
-    if not isinstance(task_factory, Callable):
+    if not callable(task_factory):
         raise AdapterError(f"Loaded symbol {task_spec!r} is not callable.")
     try:
         task = task_factory(**task_kwargs)

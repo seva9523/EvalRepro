@@ -62,7 +62,7 @@ def _coverage_match(left: dict[str, Any], right: dict[str, Any]) -> bool:
     if left["complete"]:
         declared = (left["declared_count"], right["declared_count"])
         return None in declared or declared[0] == declared[1]
-    return left["sample_limit"] == right["sample_limit"]
+    return bool(left["sample_limit"] == right["sample_limit"])
 
 
 def compare_manifest_data(left: dict[str, Any], right: dict[str, Any]) -> Comparison:
