@@ -1,0 +1,33 @@
+name: Adapter proposal
+description: Propose support for a real evaluation framework/source
+title: "[Adapter]: "
+labels: [enhancement, help wanted]
+body:
+  - type: input
+    attributes:
+      label: Framework and public reference
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Reproducibility problem
+      description: Describe a real dependency, dataset, config, or framework drift risk.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Record and contract shape
+      description: What objects, semantic fields, revisions, and parameters must the adapter expose?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Validation plan
+      description: Include a matching case and at least one mutation the adapter must catch.
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: Contribution
+      options:
+        - label: I am willing to help implement or test this adapter.
