@@ -1,0 +1,90 @@
+name: Bootstrap founding release
+
+on:
+  push:
+    branches:
+      - feat/founding-release
+    paths:
+      - bootstrap/**
+      - .github/workflows/bootstrap.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: evalrepro-founding-release
+  cancel-in-progress: true
+
+jobs:
+  bootstrap:
+    name: Extract, validate, and publish founding branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout founding branch
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.1
+        with:
+          ref: feat/founding-release
+          fetch-depth: 0
+
+      - name: Reconstruct and extract project
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat bootstrap/part-*.txt | base64 --decode > /tmp/evalrepro.zip
+          echo "a273c50e45ff1338b792af713e497600a402e71fd48e788bf021266559634235  /tmp/evalrepro.zip" | sha256sum --check
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+
+          archive_path = Path("/tmp/evalrepro.zip")
+          with zipfile.ZipFile(archive_path) as archive:
+              members = archive.infolist()
+              for member in members:
+                  parts = Path(member.filename).parts
+                  if member.filename.startswith("/") or ".." in parts:
+                      raise RuntimeError(f"Unsafe archive member: {member.filename}")
+              archive.extractall(".")
+              print(f"Extracted {len(members)} project files")
+          PY
+          rm -rf bootstrap
+          rm -f .github/workflows/bootstrap.yml
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Install project and development tools
+        run: python -m pip install -e ".[dev]"
+
+      - name: Apply canonical formatting
+        shell: bash
+        run: |
+          set -euo pipefail
+          ruff format .
+          ruff check --fix .
+          ruff format .
+
+      - name: Run quality gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          ruff format --check .
+          ruff check .
+          mypy src/evalrepro
+          pytest --cov=evalrepro --cov-report=term-missing
+          python -m build
+          git diff --check
+
+      - name: Commit validated founding release
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: establish EvalRepro public alpha"
+          git push origin HEAD:feat/founding-release
