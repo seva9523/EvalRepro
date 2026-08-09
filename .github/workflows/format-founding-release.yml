@@ -1,4 +1,4 @@
-name: Format founding release
+name: Apply founding lint fixes
 
 on:
   push:
@@ -12,11 +12,11 @@ permissions:
   contents: write
 
 concurrency:
-  group: evalrepro-format-founding-release
+  group: evalrepro-founding-lint
   cancel-in-progress: true
 
 jobs:
-  format:
+  lint-fix:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -32,23 +32,82 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install pinned formatter
+      - name: Install pinned linter
         run: python -m pip install ruff==0.16.2
 
-      - name: Format and verify
+      - name: Apply targeted lint fixes
         shell: bash
         run: |
           set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          replacements = {
+              "src/evalrepro/adapters/inspect.py": [
+                  (
+                      "except Exception as exc:  # noqa: BLE001 - framework errors need user-facing context",
+                      "except Exception as exc:",
+                  ),
+              ],
+              "src/evalrepro/cli.py": [
+                  ("from typing import Sequence", "from collections.abc import Sequence"),
+              ],
+              "src/evalrepro/compare.py": [
+                  ("from enum import Enum", "from enum import StrEnum"),
+                  ("class Verdict(str, Enum):", "class Verdict(StrEnum):"),
+                  ("enumerate(zip(left, right))", "enumerate(zip(left, right, strict=False))"),
+              ],
+              "src/evalrepro/manifest.py": [
+                  ("dt.datetime.now(dt.timezone.utc)", "dt.datetime.now(dt.UTC)"),
+              ],
+              "tests/test_normalise_extra.py": [
+                  ("tzinfo=dt.timezone.utc", "tzinfo=dt.UTC"),
+              ],
+              "tests/test_inspect_adapter.py": [
+                  (
+                      "from types import SimpleNamespace\n",
+                      "from types import SimpleNamespace\nfrom typing import ClassVar\n",
+                  ),
+                  (
+                      '    metadata = {"purpose": "test"}',
+                      '    metadata: ClassVar[dict[str, str]] = {"purpose": "test"}',
+                  ),
+                  (
+                      "    dataset = [",
+                      "    dataset: ClassVar[list[dict[str, object]]] = [",
+                  ),
+              ],
+          }
+
+          for file_name, file_replacements in replacements.items():
+              path = Path(file_name)
+              text = path.read_text()
+              for old, new in file_replacements:
+                  count = text.count(old)
+                  if count != 1:
+                      raise SystemExit(
+                          f"Expected exactly one occurrence in {file_name}: {old!r}; found {count}"
+                      )
+                  text = text.replace(old, new)
+              path.write_text(text)
+          PY
+
+          ruff check --fix .
           ruff format .
           ruff format --check .
+          ruff check .
           git diff --check
 
-      - name: Commit and push formatting
+      - name: Commit and push lint fixes
         shell: bash
         run: |
           set -euo pipefail
+          if git diff --quiet; then
+            echo "No lint changes remain."
+            exit 0
+          fi
           git config user.name "seva9523"
           git config user.email "188485706+seva9523@users.noreply.github.com"
           git add src tests
-          git commit -m "style: apply canonical Ruff formatting"
+          git commit -m "style: satisfy Ruff lint rules"
           git push origin HEAD:feat/founding-release
