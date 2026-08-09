@@ -1,0 +1,94 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "evalrepro"
+version = "0.1.0a1"
+description = "Detect semantic drift in AI evaluation inputs and contracts"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [
+  { name = "Sevinj Ahmadova" },
+]
+keywords = [
+  "ai-evaluation",
+  "reproducibility",
+  "benchmarking",
+  "semantic-drift",
+  "llm",
+  "mlops",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Software Development :: Testing",
+]
+dependencies = []
+
+[project.optional-dependencies]
+inspect = ["inspect-ai>=0.3.86"]
+dev = [
+  "build>=1.2.2",
+  "mypy>=1.17",
+  "pytest>=8.3",
+  "pytest-cov>=6.2",
+  "ruff>=0.12",
+]
+
+[project.scripts]
+evalrepro = "evalrepro.cli:entrypoint"
+
+[project.urls]
+Homepage = "https://github.com/seva9523/EvalRepro"
+Documentation = "https://github.com/seva9523/EvalRepro#readme"
+Issues = "https://github.com/seva9523/EvalRepro/issues"
+Source = "https://github.com/seva9523/EvalRepro"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+evalrepro = ["py.typed"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-config --strict-markers"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["evalrepro"]
+omit = ["src/evalrepro/__main__.py"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 90
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["evalrepro"]
+warn_unused_configs = true

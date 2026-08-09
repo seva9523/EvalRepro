@@ -1,0 +1,32 @@
+{
+  "card_schema_version": 1,
+  "id": "inspect-evals-datasets-4.8.5-to-5.0.1",
+  "status": "fork-validated",
+  "date": "2026-08-09",
+  "framework": "Inspect Evals",
+  "question": "Do selected complete evaluation datasets change semantically between datasets 4.8.5 and 5.0.1?",
+  "baseline": {"datasets": "4.8.5", "python": "3.12"},
+  "candidate": {"datasets": "5.0.1", "python": "3.12"},
+  "records_compared": 22773,
+  "verdict": "reproducible",
+  "evaluations": [
+    {"name": "BBQ — Age", "records": 3680},
+    {"name": "PIQA", "records": 1838},
+    {"name": "APPS — introductory", "records": 1000},
+    {"name": "MedQA", "records": 1273},
+    {"name": "MMMU — Math multiple choice", "records": 29},
+    {"name": "SciKnowEval — biology literature QA", "records": 14838},
+    {"name": "V*Bench — attribute recognition", "records": 115}
+  ],
+  "evidence": {
+    "upstream_issue": "https://github.com/UKGovernmentBEIS/inspect_evals/issues/2049",
+    "branch": "https://github.com/seva9523/inspect_evals/tree/investigate/datasets-5-reproducibility",
+    "validation_pr": "https://github.com/seva9523/inspect_evals/pull/1",
+    "revision": "3d9d1afdad953523b5869463456494761f2d06ae"
+  },
+  "limitations": [
+    "The comparison covers seven selected evaluations, not the complete Inspect Evals catalogue.",
+    "The status is fork-validated and does not imply upstream endorsement.",
+    "Matching records do not guarantee identical model outputs or scores."
+  ]
+}

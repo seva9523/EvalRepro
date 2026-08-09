@@ -1,0 +1,56 @@
+name: EvalRepro compare
+description: Detect semantic drift between two EvalRepro manifests
+branding:
+  icon: check-circle
+  color: blue
+inputs:
+  baseline:
+    description: Path to the baseline manifest
+    required: true
+  candidate:
+    description: Path to the candidate manifest
+    required: true
+  report-json:
+    description: JSON report path
+    required: false
+    default: evalrepro-report.json
+  report-markdown:
+    description: Markdown report path
+    required: false
+    default: evalrepro-report.md
+  fail-on-drift:
+    description: Fail the step when drift or a mismatch is detected
+    required: false
+    default: "true"
+runs:
+  using: composite
+  steps:
+    - name: Install EvalRepro from the referenced action revision
+      shell: bash
+      run: python -m pip install "${{ github.action_path }}"
+    - name: Compare manifests
+      shell: bash
+      env:
+        EVALREPRO_BASELINE: ${{ inputs.baseline }}
+        EVALREPRO_CANDIDATE: ${{ inputs.candidate }}
+        EVALREPRO_REPORT_JSON: ${{ inputs.report-json }}
+        EVALREPRO_REPORT_MARKDOWN: ${{ inputs.report-markdown }}
+        EVALREPRO_FAIL_ON_DRIFT: ${{ inputs.fail-on-drift }}
+      run: |
+        set +e
+        evalrepro compare \
+          "$EVALREPRO_BASELINE" \
+          "$EVALREPRO_CANDIDATE" \
+          --json "$EVALREPRO_REPORT_JSON" \
+          --markdown "$EVALREPRO_REPORT_MARKDOWN"
+        status=$?
+        set -e
+
+        if [[ -f "$EVALREPRO_REPORT_MARKDOWN" ]]; then
+          cat "$EVALREPRO_REPORT_MARKDOWN" >> "$GITHUB_STEP_SUMMARY"
+        fi
+
+        if [[ "$status" -eq 2 && "$EVALREPRO_FAIL_ON_DRIFT" != "true" ]]; then
+          exit 0
+        fi
+        exit "$status"

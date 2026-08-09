@@ -1,0 +1,37 @@
+name: Reproducibility card
+description: Submit a public, reproducible comparison for the registry
+title: "[Card]: "
+labels: [documentation]
+body:
+  - type: input
+    attributes:
+      label: Framework/task
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Baseline and candidate
+      description: Exact versions, revisions, configurations, and public sources.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Commands and evidence
+      description: Public workflow, commands, manifests, or artifact references.
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Review status
+      options:
+        - fork-validated
+        - upstream-reviewed
+        - upstream-merged
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: Data rights
+      options:
+        - label: The submission contains no raw restricted dataset content or confidential data.
+          required: true

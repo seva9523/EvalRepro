@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Usage and design questions
+    url: https://github.com/seva9523/EvalRepro/discussions
+    about: Ask questions or discuss designs before substantial implementation.
+  - name: Security report
+    url: https://github.com/seva9523/EvalRepro/security/advisories/new
+    about: Privately report a vulnerability.

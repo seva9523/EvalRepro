@@ -1,0 +1,33 @@
+name: Bug report
+description: Report reproducible incorrect behaviour
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: textarea
+    attributes:
+      label: Problem
+      description: What happened and why is it incorrect?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Minimal reproduction
+      description: Include sanitised commands, fixtures, and observed output.
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: EvalRepro version
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Python and operating system
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: Data safety
+      options:
+        - label: I removed credentials, confidential records, and sensitive manifests.
+          required: true

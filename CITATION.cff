@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If EvalRepro supports your research or evaluation infrastructure, please cite the software."
+title: "EvalRepro"
+type: software
+authors:
+  - family-names: "Ahmadova"
+    given-names: "Sevinj"
+repository-code: "https://github.com/seva9523/EvalRepro"
+license: "Apache-2.0"
+version: "0.1.0-alpha.1"
+date-released: "2026-08-09"
+keywords:
+  - AI evaluation
+  - reproducibility
+  - semantic drift
+  - benchmarking
