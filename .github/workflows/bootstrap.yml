@@ -39,6 +39,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          cat <<'EOF' | sha256sum --check
+          0487abeb818895afa0fbbdea038130da5289a20e1c180f144a3ea1e60ad7c7b3  bootstrap/part-00.txt
+          a3a195746dbbafd08a0cd85a1e79764f7b335177dd93e90ac3b3c292f9dac4c4  bootstrap/part-01.txt
+          a702e036a748771be740c6a82a6ad40356fb742ec3294b6fa2d3eeec05098b7e  bootstrap/part-02.txt
+          184377a5b8ce37454df1001b9e296580e15a917e70854fc0b52fc0d92852e762  bootstrap/part-03.txt
+          EOF
           cat bootstrap/part-*.txt | base64 --decode > /tmp/evalrepro.zip
           echo "a273c50e45ff1338b792af713e497600a402e71fd48e788bf021266559634235  /tmp/evalrepro.zip" | sha256sum --check
           python3 - <<'PY'
