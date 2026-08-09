@@ -1,0 +1,54 @@
+name: Format founding release
+
+on:
+  push:
+    branches:
+      - automation/format-founding-release
+  pull_request:
+    branches:
+      - feat/founding-release
+
+permissions:
+  contents: write
+
+concurrency:
+  group: evalrepro-format-founding-release
+  cancel-in-progress: true
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout founding branch
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.1
+        with:
+          ref: feat/founding-release
+          fetch-depth: 0
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned formatter
+        run: python -m pip install ruff==0.16.2
+
+      - name: Format and verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          ruff format .
+          ruff format --check .
+          git diff --check
+
+      - name: Commit and push formatting
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "seva9523"
+          git config user.email "188485706+seva9523@users.noreply.github.com"
+          git add src tests
+          git commit -m "style: apply canonical Ruff formatting"
+          git push origin HEAD:feat/founding-release
