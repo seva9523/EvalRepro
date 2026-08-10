@@ -87,13 +87,11 @@ One in-memory EvalRepro record represents one task:
   },
   "choices": null,
   "metadata": {
-    "source_documents": [
-      {
-        "path": "tasks/real-estate/.../documents/source.docx",
-        "size_bytes": 1234,
-        "content_sha256": "..."
-      }
-    ],
+    "source_documents": {
+      "count": 14,
+      "total_bytes": 123456,
+      "ordered_digest": "..."
+    },
     "task_extra": {}
   }
 }
@@ -109,8 +107,9 @@ document bytes. Task IDs are visible only through the optional diagnostic previe
 - tags preserve source order;
 - criteria preserve source order because rubric presentation is part of the contract;
 - mappings use EvalRepro's canonical key ordering;
-- source documents are sorted by repository-relative POSIX path;
-- repeated shared document directories are read once per snapshot and reused across task records.
+- source documents are sorted by repository-relative POSIX path before the inventory is hashed;
+- task records store only the inventory count, total bytes, and ordered inventory digest;
+- repeated shared document directories are read and summarised once per snapshot.
 
 ## Contract decisions
 
@@ -123,8 +122,8 @@ Adapter contract version 1 resolves the original open design questions as follow
    understand.
 3. Adding or removing tasks from two complete selections produces `coverage_mismatch` because the
    complete task counts differ.
-4. Repository-relative document paths, sizes, and content hashes are semantic. Moving equal bytes
-   to a different path is therefore drift.
+4. Repository-relative document paths, sizes, and content hashes are semantic inputs to one
+   ordered inventory digest. Moving equal bytes to a different path is therefore drift.
 5. `--no-id-preview` removes task IDs from the manifest. Reports retain aggregate hash/count
    evidence without attempting to reveal changed task IDs.
 
