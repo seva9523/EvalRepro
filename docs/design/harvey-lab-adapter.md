@@ -1,6 +1,6 @@
 # Harvey LAB adapter design
 
-Status: proposed
+Status: implemented in adapter contract version 1; public pinned-revision case study pending
 
 Tracking issue: [#13](https://github.com/seva9523/EvalRepro/issues/13)
 
@@ -8,18 +8,19 @@ Upstream project: [harveyai/harvey-labs](https://github.com/harveyai/harvey-labs
 
 ## Purpose
 
-Harvey LAB represents legal-agent evaluations as task directories containing a `task.json`, effective
-instructions, expected deliverables, rubric criteria, and synthetic source documents. Those inputs can
-change across tags or commits while schema validation and ordinary harness tests continue to pass.
+Harvey LAB represents legal-agent evaluations as task directories containing a `task.json`,
+effective instructions, expected deliverables, rubric criteria, and synthetic source documents.
+Those inputs can change across tags or commits while schema validation and ordinary harness tests
+continue to pass.
 
-The adapter should create a hash-only EvalRepro manifest that answers a narrower question:
+The adapter creates a hash-only EvalRepro manifest that answers a narrower question:
 
 > Do two Harvey LAB revisions describe the same selected task contracts and source-document bytes?
 
-It does not run an agent, grade output, validate legal correctness, or claim that matching task inputs
-produce identical model/judge results.
+It does not run an agent, grade output, validate legal correctness, or claim that matching task
+inputs produce identical model or judge results.
 
-## Proposed CLI
+## CLI
 
 ```bash
 evalrepro snapshot harvey-lab /path/to/harvey-labs \
@@ -31,32 +32,35 @@ evalrepro snapshot harvey-lab /path/to/harvey-labs-candidate \
   -o candidate.manifest.json
 ```
 
-Selectors:
+The selector accepts:
 
-- `all`: every discovered `tasks/**/task.json`;
-- a practice-area/task prefix, such as `corporate-ma`;
-- one exact task ID, such as `real-estate/extract-psa-key-terms/scenario-01`.
+- `all` for every discovered `tasks/**/task.json`;
+- a task-prefix selection such as `corporate-ma`;
+- one exact task ID such as `real-estate/extract-psa-key-terms/scenario-01`.
 
-Discovery must be deterministic and ordered by POSIX-style task ID.
+Discovery is deterministic and ordered by POSIX-style task ID. `--limit` and `--no-id-preview`
+use the same manifest semantics as the JSONL and Inspect adapters.
 
 ## Effective task loading
 
-The adapter should mirror the relevant, model-free parts of Harvey LAB's harness:
+The adapter mirrors the model-free parts of Harvey LAB's harness without importing or executing its
+Python modules:
 
 1. locate `tasks/<task-id>/task.json`;
 2. parse the JSON object;
 3. use inline `instructions` when non-empty;
 4. otherwise load `instructions.md` from the task directory;
-5. resolve `docs_dir` relative to the task directory when present, otherwise use `documents/`;
-6. inventory regular files under the effective document directory recursively.
+5. resolve `docs_dir` relative to the task directory, or use `documents/` by default;
+6. inventory regular source files recursively and hash their bytes;
+7. validate titles, rubrics, deliverables, tags, and task field types before snapshotting.
 
-The adapter should fail with a precise error for malformed JSON, missing effective instructions,
-missing effective document directories, duplicate task IDs, or unreadable source files. It should not
-import or execute Harvey LAB Python modules.
+The adapter returns a precise user-facing error for malformed JSON, missing effective instructions,
+missing document directories, duplicate task IDs, unreadable files, invalid field types, absolute or
+escaping `docs_dir` values, and symbolic links in task or source paths.
 
 ## Record contract
 
-One EvalRepro record represents one task. A proposed normalised shape is:
+One in-memory EvalRepro record represents one task:
 
 ```json
 {
@@ -66,7 +70,7 @@ One EvalRepro record represents one task. A proposed normalised shape is:
     "instructions": "...",
     "work_type": "analyze",
     "tags": ["..."],
-    "docs_dir": "documents",
+    "docs_dir": "tasks/real-estate/.../documents",
     "deliverables": {"report.docx": "report.docx"}
   },
   "target": {
@@ -76,7 +80,8 @@ One EvalRepro record represents one task. A proposed normalised shape is:
         "title": "...",
         "match_criteria": "...",
         "deliverables": ["report.docx"],
-        "sources": ["source.docx"]
+        "sources": ["source.docx"],
+        "extra": {}
       }
     ]
   },
@@ -84,7 +89,7 @@ One EvalRepro record represents one task. A proposed normalised shape is:
   "metadata": {
     "source_documents": [
       {
-        "path": "documents/source.docx",
+        "path": "tasks/real-estate/.../documents/source.docx",
         "size_bytes": 1234,
         "content_sha256": "..."
       }
@@ -94,110 +99,104 @@ One EvalRepro record represents one task. A proposed normalised shape is:
 }
 ```
 
-The record exists only in memory before the normal EvalRepro manifest builder hashes it. The manifest
-must not contain raw instructions, rubric text, task JSON, or document bytes.
+This record exists only in memory before the normal manifest builder hashes it. The output
+manifest does not contain raw instructions, rubric text, task JSON, relative document paths, or
+document bytes. Task IDs are visible only through the optional diagnostic preview.
 
 ### Ordering rules
 
-- Task records: sorted by task ID.
-- Tags: preserve source order initially; a tag-order-only change is therefore visible until upstream
-  semantics establish that order is irrelevant.
-- Criteria: preserve source order because all-pass rubric presentation and criterion IDs are part of
-  the published contract.
-- Deliverable mappings: normalised through EvalRepro's canonical mapping rules.
-- Source documents: sorted by POSIX relative path.
+- task records are sorted by task ID;
+- tags preserve source order;
+- criteria preserve source order because rubric presentation is part of the contract;
+- mappings use EvalRepro's canonical key ordering;
+- source documents are sorted by repository-relative POSIX path;
+- repeated shared document directories are read once per snapshot and reused across task records.
+
+## Contract decisions
+
+Adapter contract version 1 resolves the original open design questions as follows:
+
+1. The resolved repository-relative `docs_dir` is semantic. Equivalent spellings such as
+   `documents` and `./documents` compare equal, while a different effective corpus path is drift.
+2. Unknown top-level task fields and unknown criterion fields are included in `task_extra` or
+   `extra`. This fails closed when Harvey LAB adds a field whose semantics EvalRepro does not yet
+   understand.
+3. Adding or removing tasks from two complete selections produces `coverage_mismatch` because the
+   complete task counts differ.
+4. Repository-relative document paths, sizes, and content hashes are semantic. Moving equal bytes
+   to a different path is therefore drift.
+5. `--no-id-preview` removes task IDs from the manifest. Reports retain aggregate hash/count
+   evidence without attempting to reveal changed task IDs.
+
+Changing one of these decisions requires incrementing `adapter_contract_version` so old and new
+contracts cannot compare as though they were identical scopes.
 
 ## Scope, provenance, and runtime
 
-### Semantic scope
+Semantic scope contains:
 
-The following should be in adapter scope:
+- adapter name and contract version;
+- exact, prefix, or full task selection;
+- SHA-256 document-content policy;
+- the document-path and unknown-field decisions above;
+- the standard semantic field mapping.
 
-- adapter name and adapter contract version;
-- selection (`all`, prefix, or exact task ID);
-- whether document content is included;
-- semantic field mapping;
-- any explicit exclusion patterns.
+Checkout path, Git commit, tag, dirty state, remote origin, and Harvey LAB package version are
+provenance rather than scope. Two checkouts with identical task bytes can therefore compare as
+`reproducible` even when their revisions or local paths differ.
 
-The checkout path, Git commit, tag, and Harvey LAB repository version must not be in semantic scope.
-Putting revisions in scope would make the intended comparison return `scope_mismatch` before task
-content is examined.
+Provenance records, when available:
 
-### Provenance
+- credential-stripped repository origin;
+- Git commit and exact tags;
+- tracked-diff and full status digests without exposing changed filenames;
+- dirty working-tree state;
+- Harvey LAB version from `pyproject.toml`;
+- selected task count and task root.
 
-Record when available:
+Runtime uses EvalRepro's existing Python/platform collector. Harvey LAB is not imported and
+remains an optional source checkout rather than a package dependency.
 
-- repository origin URL;
-- Git commit SHA;
-- exact tag(s) pointing at the commit;
-- dirty working-tree status;
-- task root and selected task count;
-- adapter limitations.
+## Privacy and safety
 
-A dirty checkout should be clearly reported but not rejected by default; users may be intentionally
-comparing local changes. A future `--require-clean` option can enforce a clean checkout.
+Harvey LAB asks contributors to use synthetic matter data, but EvalRepro does not assume every
+fork is safe to publish. The adapter therefore:
 
-### Runtime
+- performs no network, model, judge, or external API calls;
+- never writes raw task or document content to a manifest;
+- strips credentials and query secrets from HTTP(S) Git remote URLs;
+- rejects source paths that escape the supplied repository root;
+- rejects symbolic-link task, instruction, document-root, and source-file paths;
+- supports `--no-id-preview` for sensitive task names;
+- retains the general warning that hashes are not anonymisation.
 
-Record Python and EvalRepro versions using the existing runtime collector. No Harvey LAB Python package
-is imported, so the adapter has no runtime dependency on its harness environment.
+Users remain responsible for source licences, confidentiality, and organisational policy.
 
-## Privacy and licensing
+## Offline mutation matrix
 
-Harvey LAB states that contributions should use synthetic matter data, but EvalRepro must not infer
-that every downstream fork is safe to publish. The adapter therefore:
-
-- stores only record and field digests in the output manifest;
-- stores relative document paths, sizes, and content digests only inside the in-memory record that is
-  subsequently hashed, not as raw manifest fields;
-- supports the existing `--no-id-preview` option;
-- warns that hashes are not anonymisation and can reveal membership for predictable content;
-- does not upload documents or contact external services.
-
-Users remain responsible for source licences and organisational policy.
-
-## Mutation test matrix
-
-Synthetic, network-free tests should prove detection of:
+Synthetic tests cover:
 
 | Mutation | Expected result |
 | --- | --- |
-| same repository copied to a different absolute path | `reproducible` |
-| different Git commit metadata with identical task bytes | `reproducible` |
-| task added or removed | `semantic_drift` or `coverage_mismatch`, depending on complete selection semantics |
-| task ordering only | deterministic discovery prevents false drift |
-| instruction text changed | `semantic_drift` |
+| same repository copied to another absolute path | `reproducible` |
+| Git metadata or dirty state changed, task bytes equal | `reproducible` |
+| task added or removed from a complete selection | `coverage_mismatch` |
+| exact/prefix/full selections differ | `scope_mismatch` |
+| instruction, rubric, deliverable, unknown field, or document bytes changed | `semantic_drift` |
 | inline instructions replaced by equal `instructions.md` content | `reproducible` |
-| rubric criterion text changed | `semantic_drift` |
-| criterion order changed | `semantic_drift`/`order_drift` in the relevant field digests |
-| deliverable mapping changed | `semantic_drift` |
-| `docs_dir` changed but effective files and semantic path contract remain equal | decision must be documented before implementation |
-| source-document bytes changed | `semantic_drift` |
-| same document bytes at a different relative path | `semantic_drift` unless a later contract explicitly makes paths non-semantic |
-| partial prefix versus full benchmark | `scope_mismatch` |
-| missing/unreadable document | adapter error, exit code 3 |
+| equivalent `docs_dir` spelling resolves to the same corpus | `reproducible` |
+| equal document bytes moved to a different relative path | `semantic_drift` |
+| missing, malformed, escaping, symlinked, or unreadable source | adapter error, exit code 3 |
 
-## Public case study plan
+All fixtures are local and synthetic. The adapter tests do not require Harvey LAB, provider keys,
+network access, model execution, or judge execution.
 
-The first case study should compare two immutable Harvey LAB revisions, preferably a released tag and a
-later commit that contains a documented task/rubric change. It should publish:
+## Public case study gate
 
-- exact repository revisions;
-- adapter and manifest schema versions;
-- task and source-document counts;
-- comparison verdict and aggregate changed-task counts;
-- commands and limitations;
-- no raw task or document content.
+The first public case study should compare two immutable Harvey LAB revisions and publish exact
+revisions, adapter/schema versions, task and document counts, the comparison verdict, aggregate
+changed-task counts, commands, and limitations. It must not publish raw task or document content.
 
-Before contacting Harvey maintainers, the adapter must have offline unit tests, a reproducible public
-case, and conservative wording. Upstream outreach should ask whether the contract captures the
-benchmark semantics correctly and whether a CI/example integration is useful.
-
-## Open design decisions
-
-1. Whether `docs_dir`'s textual value is semantic when two paths resolve to identical file inventories.
-2. Whether unknown top-level `task.json` fields belong in `metadata.task_extra` by default or require an
-   explicit allow-list.
-3. Whether a full-benchmark task add/remove should be classified as semantic drift or coverage mismatch.
-4. Whether document relative paths should be included as semantic fields in addition to content bytes.
-5. How to report changed task IDs without publishing ID previews when `--no-id-preview` is active.
+No Harvey LAB issue or pull request should be opened until the adapter is merged, a pinned-revision
+case is reproducible, and the result can be presented as a request for semantic review rather
+than as a claim of Harvey adoption or endorsement.
