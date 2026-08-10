@@ -1,6 +1,8 @@
 # EvalRepro
 
 [![CI](https://github.com/seva9523/EvalRepro/actions/workflows/ci.yml/badge.svg)](https://github.com/seva9523/EvalRepro/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/evalrepro?include_prereleases&label=PyPI)](https://pypi.org/project/evalrepro/)
+[![Python](https://img.shields.io/pypi/pyversions/evalrepro)](https://pypi.org/project/evalrepro/)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![Project status: public alpha](https://img.shields.io/badge/status-public%20alpha-orange.svg)](ROADMAP.md)
 
@@ -46,16 +48,25 @@ reproducible | order drift | semantic drift
 | `coverage_mismatch` | The manifests cover different ranges or completeness levels. |
 | `scope_mismatch` | The manifests describe different tasks, parameters, or fields. |
 
-## Install from source
+## Install
+
+Install the public alpha from PyPI:
 
 ```bash
-python -m pip install "evalrepro @ git+https://github.com/seva9523/EvalRepro.git@main"
+python -m pip install "evalrepro==0.1.0a1"
 ```
 
 For the optional Inspect adapter:
 
 ```bash
-python -m pip install "evalrepro[inspect] @ git+https://github.com/seva9523/EvalRepro.git@main"
+python -m pip install "evalrepro[inspect]==0.1.0a1"
+```
+
+To install the same immutable release directly from source:
+
+```bash
+python -m pip install \
+  "evalrepro @ git+https://github.com/seva9523/EvalRepro.git@v0.1.0a1"
 ```
 
 ## Quick start: JSONL
@@ -104,8 +115,10 @@ image content is represented by a content digest instead of an environment-speci
 
 ## GitHub Action
 
+Use the immutable public-alpha tag:
+
 ```yaml
-- uses: seva9523/EvalRepro@main
+- uses: seva9523/EvalRepro@v0.1.0a1
   with:
     baseline: artifacts/baseline.json
     candidate: artifacts/candidate.json
