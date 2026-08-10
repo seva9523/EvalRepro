@@ -1,0 +1,113 @@
+name: Verify EvalRepro PyPI release
+
+on:
+  push:
+    branches:
+      - automation/verify-pypi-v0.1.0a1
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout verification branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: automation/verify-pypi-v0.1.0a1
+          fetch-depth: 0
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Wait for PyPI and record immutable file metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import time
+          import urllib.error
+          import urllib.request
+          from pathlib import Path
+
+          url = "https://pypi.org/pypi/evalrepro/0.1.0a1/json"
+          payload = None
+          last_error = None
+          for attempt in range(1, 13):
+              try:
+                  with urllib.request.urlopen(url, timeout=30) as response:
+                      payload = json.load(response)
+                  break
+              except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as exc:
+                  last_error = exc
+                  print(f"Attempt {attempt}/12: PyPI metadata not ready: {exc}")
+                  if attempt < 12:
+                      time.sleep(15)
+          if payload is None:
+              raise SystemExit(f"PyPI release was not available after retries: {last_error}")
+
+          info = payload["info"]
+          files = sorted(payload["urls"], key=lambda item: item["filename"])
+          if info["name"].lower() != "evalrepro" or info["version"] != "0.1.0a1":
+              raise SystemExit(f"Unexpected metadata: {info['name']} {info['version']}")
+          if not any(item["packagetype"] == "bdist_wheel" for item in files):
+              raise SystemExit("Published release has no wheel")
+          if not any(item["packagetype"] == "sdist" for item in files):
+              raise SystemExit("Published release has no source distribution")
+
+          lines = [
+              "EvalRepro PyPI verification",
+              "============================",
+              f"name={info['name']}",
+              f"version={info['version']}",
+              f"requires_python={info.get('requires_python')}",
+              f"project_url={info.get('project_url')}",
+              "files:",
+          ]
+          for item in files:
+              lines.extend(
+                  [
+                      f"- filename={item['filename']}",
+                      f"  packagetype={item['packagetype']}",
+                      f"  size={item['size']}",
+                      f"  upload_time_iso_8601={item['upload_time_iso_8601']}",
+                      f"  sha256={item['digests']['sha256']}",
+                  ]
+              )
+          Path("pypi-v0.1.0a1-verification.txt").write_text("\n".join(lines) + "\n")
+          print("\n".join(lines))
+          PY
+
+      - name: Install from PyPI in a clean environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m venv "$RUNNER_TEMP/evalrepro-pypi-smoke"
+          "$RUNNER_TEMP/evalrepro-pypi-smoke/bin/python" -m pip install \
+            --disable-pip-version-check \
+            --no-cache-dir \
+            "evalrepro==0.1.0a1"
+          "$RUNNER_TEMP/evalrepro-pypi-smoke/bin/evalrepro" --help >/dev/null
+          installed_version=$(
+            "$RUNNER_TEMP/evalrepro-pypi-smoke/bin/python" -c \
+              'import evalrepro; print(evalrepro.__version__)'
+          )
+          test "$installed_version" = "0.1.0a1"
+          printf 'clean_install_version=%s\n' "$installed_version" \
+            >> pypi-v0.1.0a1-verification.txt
+
+      - name: Commit verification record to temporary branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pypi-v0.1.0a1-verification.txt
+          git commit -m "test: verify evalrepro 0.1.0a1 on PyPI"
+          git push origin HEAD:automation/verify-pypi-v0.1.0a1
