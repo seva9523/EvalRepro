@@ -115,8 +115,9 @@ image content is represented by a content digest instead of an environment-speci
 
 ## Quick start: Harvey LAB
 
-The Harvey LAB adapter is available on the current `main` branch and is planned for the next package
-release. It reads a local checkout without importing the Harvey harness or running a model or judge.
+The Harvey LAB adapter is planned for the next package release. From a source checkout containing
+the adapter, it reads a local benchmark checkout without importing the Harvey harness or running a
+model or judge.
 
 ```bash
 evalrepro snapshot harvey-lab ./harvey-labs \
