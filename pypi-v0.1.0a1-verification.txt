@@ -1,0 +1,18 @@
+EvalRepro PyPI verification
+============================
+name=evalrepro
+version=0.1.0a1
+requires_python=>=3.11
+project_url=https://pypi.org/project/evalrepro/
+files:
+- filename=evalrepro-0.1.0a1-py3-none-any.whl
+  packagetype=bdist_wheel
+  size=23247
+  upload_time_iso_8601=2026-08-10T08:55:03.693707Z
+  sha256=5c0fed1909e78bb52600029fef098c3fac22072192d9eef3bc75d50ce42f7360
+- filename=evalrepro-0.1.0a1.tar.gz
+  packagetype=sdist
+  size=28594
+  upload_time_iso_8601=2026-08-10T08:55:04.931161Z
+  sha256=beda9d4c5d8092ae4fce51839fd560b4deb0d51c8b83566c15e63667171ff3dc
+clean_install_version=0.1.0a1
