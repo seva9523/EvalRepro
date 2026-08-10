@@ -48,9 +48,7 @@ def test_cli_snapshots_harvey_lab_without_id_preview(tmp_path: Path) -> None:
 def test_cli_harvey_lab_user_error_returns_three(tmp_path: Path, capsys: object) -> None:
     output = tmp_path / "manifest.json"
 
-    exit_code = main(
-        ["snapshot", "harvey-lab", str(tmp_path / "missing"), "-o", str(output)]
-    )
+    exit_code = main(["snapshot", "harvey-lab", str(tmp_path / "missing"), "-o", str(output)])
 
     assert exit_code == 3
     assert "repository path does not exist" in capsys.readouterr().err  # type: ignore[attr-defined]
