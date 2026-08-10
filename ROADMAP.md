@@ -5,12 +5,13 @@
 - [x] Hash-only manifest schema and comparator
 - [x] JSONL adapter
 - [x] Inspect AI adapter
+- [x] Harvey LAB task-contract adapter
 - [x] Text, JSON, and Markdown reports
 - [x] GitHub Action
 - [x] Founding reproducibility case study
 - [ ] External schema review
 - [ ] First external beta repository
-- [ ] First external contributor
+- [x] First external contributor
 
 ## v0.2 — adapter ecosystem
 
@@ -24,7 +25,7 @@
 ## v0.3 — CI and privacy hardening
 
 - [ ] Keyed digest mode
-- [ ] Disable/redact ID previews
+- [x] Disable ID previews (`--no-id-preview`)
 - [ ] HTML report
 - [ ] Signed manifest attestations
 - [ ] Baseline selection and update workflow
