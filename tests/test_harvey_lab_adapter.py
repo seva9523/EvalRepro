@@ -473,5 +473,5 @@ def test_selector_canonicalisation_and_remote_sanitisation(tmp_path: Path) -> No
     )
     assert adapter._sanitise_remote("https:///missing-host") is None
 
-    with pytest.raises(AdapterError, match="must not contain '..'"):
+    with pytest.raises(AdapterError, match=r"must not contain '\.\.'"):
         harvey_lab_source(tmp_path, task="../contracts")
