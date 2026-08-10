@@ -9,6 +9,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from evalrepro import __version__
+from evalrepro.adapters.harvey_lab import harvey_lab_source
 from evalrepro.adapters.inspect import inspect_source
 from evalrepro.adapters.jsonl import jsonl_source
 from evalrepro.compare import compare_manifests
@@ -82,6 +83,24 @@ def build_parser() -> argparse.ArgumentParser:
         help="Omit sample ID values from the manifest while retaining them in sample hashes",
     )
 
+    harvey_lab = snapshot_adapters.add_parser(
+        "harvey-lab",
+        help="Snapshot Harvey LAB task contracts from a local checkout",
+    )
+    harvey_lab.add_argument("source", type=Path, help="Path to the Harvey LAB repository checkout")
+    harvey_lab.add_argument(
+        "--task",
+        default="all",
+        help="Task ID, task-prefix selection, or 'all' (default: %(default)s)",
+    )
+    harvey_lab.add_argument("--output", "-o", type=Path, required=True)
+    harvey_lab.add_argument("--limit", type=_positive_limit)
+    harvey_lab.add_argument(
+        "--no-id-preview",
+        action="store_true",
+        help="Omit task IDs from the manifest while retaining them in task hashes",
+    )
+
     compare = commands.add_parser("compare", help="Compare two manifests")
     compare.add_argument("baseline", type=Path)
     compare.add_argument("candidate", type=Path)
@@ -124,6 +143,15 @@ def main(argv: Sequence[str] | None = None) -> int:
                 fields=args.fields,
                 id_field=args.id_field or None,
             )
+            write_manifest(
+                args.output,
+                build_manifest(source, args.limit, include_id_preview=not args.no_id_preview),
+            )
+            print(f"Wrote {args.output}")
+            return 0
+
+        if args.command == "snapshot" and args.adapter == "harvey-lab":
+            source = harvey_lab_source(args.source, task=args.task)
             write_manifest(
                 args.output,
                 build_manifest(source, args.limit, include_id_preview=not args.no_id_preview),

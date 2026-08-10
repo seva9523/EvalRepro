@@ -5,6 +5,20 @@ uses semantic versioning once the manifest and adapter contracts reach stability
 
 ## [Unreleased]
 
+### Added
+
+- First-party Harvey LAB task-contract adapter and CLI for hash-only comparison of exact tasks,
+  task-prefix selections, or complete local benchmark checkouts.
+- Deterministic effective-instruction, rubric, deliverable, unknown-field, document-path, and
+  document-content semantics for Harvey LAB adapter contract version 1.
+- Credential-stripped Git provenance, shared-document inventory caching, `--no-id-preview`, and
+  synthetic offline mutation coverage for the Harvey LAB workflow.
+
+### Security
+
+- Harvey LAB snapshots reject absolute or repository-escaping document roots and symbolic-link task,
+  instruction, document-root, and source-file paths.
+
 ## [0.1.0a1] - 2026-08-10
 
 ### Added

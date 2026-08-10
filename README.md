@@ -113,6 +113,32 @@ Repeat under the candidate dependency version, then compare the manifests. Inspe
 removed by the adapter because they are runtime-generated rather than evaluation semantics. Local
 image content is represented by a content digest instead of an environment-specific path.
 
+## Quick start: Harvey LAB
+
+The Harvey LAB adapter is planned for the next package release. From a source checkout containing
+the adapter, it reads a local benchmark checkout without importing the Harvey harness or running a
+model or judge.
+
+```bash
+evalrepro snapshot harvey-lab ./harvey-labs \
+  --task all \
+  -o artifacts/harvey-baseline.json
+
+evalrepro snapshot harvey-lab ./harvey-labs-candidate \
+  --task all \
+  -o artifacts/harvey-candidate.json
+
+evalrepro compare artifacts/harvey-baseline.json artifacts/harvey-candidate.json
+```
+
+`--task` accepts `all`, a practice-area/task prefix, or one exact task ID. The adapter hashes
+effective instructions, rubrics, deliverables, unknown task fields, repository-relative source
+paths, and source file bytes. Raw task text and document contents are not written to the manifest.
+Use `--no-id-preview` when task IDs should also be omitted.
+
+See the [Harvey LAB adapter contract](docs/design/harvey-lab-adapter.md) for scope, provenance,
+safety, and current semantic decisions.
+
 ## GitHub Action
 
 Use the immutable public-alpha tag:
@@ -142,6 +168,7 @@ recorded as **fork-validated**, not upstream-accepted.
 
 - Generic JSON Lines
 - Inspect AI / Inspect Evals (optional extra)
+- Harvey LAB task contracts from a local checkout
 - Framework-neutral `SnapshotSource` API for custom adapters
 
 Planned adapters are tracked in the [roadmap](ROADMAP.md). The most useful contributions are adapters
