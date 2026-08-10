@@ -174,10 +174,7 @@ def test_equivalent_docs_dir_spelling_is_reproducible(tmp_path: Path) -> None:
     write_task(left, "contracts/task-a")
     write_task(right, "contracts/task-a", docs_dir="./documents")
 
-    assert (
-        compare_manifest_data(manifest(left), manifest(right)).verdict
-        is Verdict.REPRODUCIBLE
-    )
+    assert compare_manifest_data(manifest(left), manifest(right)).verdict is Verdict.REPRODUCIBLE
 
 
 def test_no_id_preview_preserves_hashes(tmp_path: Path) -> None:
@@ -265,8 +262,7 @@ def test_git_provenance_is_versioned_sanitised_and_non_semantic(tmp_path: Path) 
             "remote",
             "add",
             "origin",
-            "https://user:secret@example.com:8443/harveyai/harvey-labs.git"
-            "?token=hidden#fragment",
+            "https://user:secret@example.com:8443/harveyai/harvey-labs.git?token=hidden#fragment",
         ],
         cwd=root,
         check=True,
@@ -283,9 +279,7 @@ def test_git_provenance_is_versioned_sanitised_and_non_semantic(tmp_path: Path) 
     clean = manifest(root)
     provenance = clean["provenance"]
     assert provenance["harvey_lab_version"] == "0.1.0"
-    assert provenance["repository_origin"] == (
-        "https://example.com:8443/harveyai/harvey-labs.git"
-    )
+    assert provenance["repository_origin"] == ("https://example.com:8443/harveyai/harvey-labs.git")
     assert provenance["git_tags"] == ["v0.1.0"]
     assert provenance["git_dirty"] is False
     assert len(provenance["git_commit"]) == 40
@@ -471,9 +465,12 @@ def test_selector_canonicalisation_and_remote_sanitisation(tmp_path: Path) -> No
     assert adapter._sanitise_remote("git@github.com:harveyai/harvey-labs.git") == (
         "github.com:harveyai/harvey-labs.git"
     )
-    assert adapter._sanitise_remote(
-        "https://user:secret@example.com:invalid/harveyai/harvey-labs.git?token=x"
-    ) == "https://example.com/harveyai/harvey-labs.git"
+    assert (
+        adapter._sanitise_remote(
+            "https://user:secret@example.com:invalid/harveyai/harvey-labs.git?token=x"
+        )
+        == "https://example.com/harveyai/harvey-labs.git"
+    )
     assert adapter._sanitise_remote("https:///missing-host") is None
 
     with pytest.raises(AdapterError, match="must not contain '..'"):
