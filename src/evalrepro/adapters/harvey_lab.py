@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 import tomllib
 from collections.abc import Mapping
@@ -13,6 +14,7 @@ from urllib.parse import urlsplit, urlunsplit
 
 from evalrepro.adapters.base import SnapshotSource
 from evalrepro.errors import AdapterError
+from evalrepro.hashing import digest
 from evalrepro.runtime import git_state, runtime_versions
 
 ADAPTER_CONTRACT_VERSION = 1
@@ -34,7 +36,7 @@ _KNOWN_CRITERION_FIELDS = {
     "sources",
 }
 
-DocumentInventory = list[dict[str, Any]]
+DocumentInventory = dict[str, int | str]
 
 
 def _read_json_object(path: Path) -> dict[str, Any]:
@@ -96,6 +98,24 @@ def _relative_to_root(root: Path, path: Path, *, label: str) -> str:
         return path.relative_to(root).as_posix()
     except ValueError as exc:
         raise AdapterError(f"Harvey LAB {label} escapes repository root: {path}") from exc
+
+
+def _reject_symlink_components(root: Path, path: Path, *, label: str) -> Path:
+    lexical_path = Path(os.path.abspath(path))
+    try:
+        relative = lexical_path.relative_to(root)
+    except ValueError as exc:
+        raise AdapterError(f"Harvey LAB {label} escapes repository root: {path}") from exc
+
+    current = root
+    for part in relative.parts:
+        current /= part
+        try:
+            if current.is_symlink():
+                raise AdapterError(f"Harvey LAB {label} must not use symbolic links: {current}")
+        except OSError as exc:
+            raise AdapterError(f"Cannot inspect Harvey LAB {label} path {current}: {exc}") from exc
+    return lexical_path
 
 
 def _effective_instructions(config: dict[str, Any], task_dir: Path, config_path: Path) -> str:
@@ -170,17 +190,29 @@ def _document_inventory(
     if cached is not None:
         return cached
 
-    inventory: DocumentInventory = []
-    for path in sorted(
-        docs_dir.rglob("*"),
-        key=lambda item: item.relative_to(docs_dir).as_posix(),
-    ):
-        if path.is_symlink():
-            raise AdapterError(f"Harvey LAB source documents must not be symbolic links: {path}")
-        if not path.is_file():
+    try:
+        paths = sorted(
+            docs_dir.rglob("*"),
+            key=lambda item: item.relative_to(docs_dir).as_posix(),
+        )
+    except OSError as exc:
+        raise AdapterError(
+            f"Cannot inventory Harvey LAB documents directory {docs_dir}: {exc}"
+        ) from exc
+
+    entries: list[dict[str, Any]] = []
+    total_bytes = 0
+    for path in paths:
+        _reject_symlink_components(root, path, label="source document")
+        try:
+            is_file = path.is_file()
+        except OSError as exc:
+            raise AdapterError(f"Cannot inspect Harvey LAB source path {path}: {exc}") from exc
+        if not is_file:
             continue
         size, content_digest = _file_digest(path)
-        inventory.append(
+        total_bytes += size
+        entries.append(
             {
                 "path": _relative_to_root(root, path.resolve(), label="source document"),
                 "size_bytes": size,
@@ -188,6 +220,11 @@ def _document_inventory(
             }
         )
 
+    inventory: DocumentInventory = {
+        "count": len(entries),
+        "total_bytes": total_bytes,
+        "ordered_digest": digest(entries),
+    }
     cache[docs_dir] = inventory
     return inventory
 
@@ -213,10 +250,7 @@ def _task_record(
         raise AdapterError(f"{config_path}: docs_dir must be relative to the task directory.")
 
     docs_path = task_dir / raw_docs_dir
-    if docs_path.is_symlink():
-        raise AdapterError(
-            f"Harvey LAB documents directory must not be a symbolic link: {docs_path}"
-        )
+    _reject_symlink_components(root, docs_path, label="documents directory")
     try:
         docs_dir = docs_path.resolve(strict=True)
     except OSError as exc:
@@ -253,10 +287,13 @@ def _task_record(
 
 
 def _canonical_selector(selector: str) -> str:
-    value = selector.strip().strip("/")
-    if not value:
+    value = selector.strip().replace("\\", "/").strip("/")
+    parts = [part for part in value.split("/") if part not in {"", "."}]
+    if not parts:
         raise AdapterError("Harvey LAB task selector must not be empty.")
-    return value
+    if any(part == ".." for part in parts):
+        raise AdapterError("Harvey LAB task selector must not contain '..' segments.")
+    return "/".join(parts)
 
 
 def _discover(root: Path, selector: str) -> tuple[Path, list[Path]]:
@@ -266,11 +303,19 @@ def _discover(root: Path, selector: str) -> tuple[Path, list[Path]]:
     if not tasks_root.is_dir():
         raise AdapterError(f"Harvey LAB tasks directory not found: {tasks_root}")
 
+    try:
+        discovered = list(tasks_root.rglob("task.json"))
+    except OSError as exc:
+        raise AdapterError(f"Cannot discover Harvey LAB tasks under {tasks_root}: {exc}") from exc
+
     configs: list[Path] = []
-    for path in tasks_root.rglob("task.json"):
-        if path.is_symlink():
-            raise AdapterError(f"Harvey LAB task configs must not be symbolic links: {path}")
-        if path.is_file():
+    for path in discovered:
+        _reject_symlink_components(root, path, label="task config")
+        try:
+            is_file = path.is_file()
+        except OSError as exc:
+            raise AdapterError(f"Cannot inspect Harvey LAB task config {path}: {exc}") from exc
+        if is_file:
             configs.append(path)
     configs.sort(key=lambda path: path.parent.relative_to(tasks_root).as_posix())
 
@@ -298,7 +343,8 @@ def _run_git(root: Path, *args: str) -> str | None:
             cwd=root,
             check=False,
             capture_output=True,
-            text=True,
+            encoding="utf-8",
+            errors="replace",
         )
     except OSError:
         return None
@@ -308,12 +354,24 @@ def _run_git(root: Path, *args: str) -> str | None:
 
 
 def _sanitise_remote(value: str | None) -> str | None:
-    if not value or "://" not in value:
+    if not value:
         return value
+    if "://" not in value:
+        prefix, separator, remainder = value.partition("@")
+        if separator and ":" in remainder and prefix:
+            return remainder
+        return value
+
     parsed = urlsplit(value)
     host = parsed.hostname or ""
-    if parsed.port is not None:
-        host = f"{host}:{parsed.port}"
+    if not host:
+        return None
+    try:
+        port = parsed.port
+    except ValueError:
+        port = None
+    if port is not None:
+        host = f"{host}:{port}"
     return urlunsplit((parsed.scheme, host, parsed.path, "", ""))
 
 
@@ -321,7 +379,7 @@ def _project_version(root: Path) -> str | None:
     path = root / "pyproject.toml"
     try:
         value = tomllib.loads(path.read_text(encoding="utf-8"))
-    except (OSError, tomllib.TOMLDecodeError):
+    except (OSError, UnicodeError, tomllib.TOMLDecodeError):
         return None
     project = value.get("project")
     if not isinstance(project, dict):
