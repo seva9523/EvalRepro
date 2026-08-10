@@ -5,6 +5,8 @@ uses semantic versioning once the manifest and adapter contracts reach stability
 
 ## [Unreleased]
 
+## [0.1.0a2] - 2026-08-10
+
 ### Added
 
 - First-party Harvey LAB task-contract adapter and CLI for hash-only comparison of exact tasks,
@@ -18,6 +20,12 @@ uses semantic versioning once the manifest and adapter contracts reach stability
 
 - Harvey LAB snapshots reject absolute or repository-escaping document roots and symbolic-link task,
   instruction, document-root, and source-file paths.
+
+### Validation
+
+- Python 3.11, 3.12, and 3.13 CI.
+- Ruff formatting and linting, strict mypy, and distribution builds.
+- 72 offline tests with 95.25% branch coverage on Python 3.12.
 
 ## [0.1.0a1] - 2026-08-10
 
@@ -41,4 +49,5 @@ uses semantic versioning once the manifest and adapter contracts reach stability
 - 54 offline tests and 96.22% branch coverage after the first external contribution.
 - Source distribution and wheel builds.
 
+[0.1.0a2]: https://github.com/seva9523/EvalRepro/releases/tag/v0.1.0a2
 [0.1.0a1]: https://github.com/seva9523/EvalRepro/releases/tag/v0.1.0a1
