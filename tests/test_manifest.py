@@ -7,7 +7,12 @@ import pytest
 
 from evalrepro.adapters.base import SnapshotSource
 from evalrepro.errors import ManifestError
-from evalrepro.manifest import build_manifest, read_manifest, validate_manifest, write_manifest
+from evalrepro.manifest import (
+    build_manifest,
+    read_manifest,
+    validate_manifest,
+    write_manifest,
+)
 
 
 def _source(records: list[dict[str, object]], *, name: str = "fixture") -> SnapshotSource:
@@ -55,6 +60,24 @@ def test_empty_dataset_is_representable() -> None:
     assert manifest["coverage"]["processed_count"] == 0
     assert manifest["coverage"]["complete"] is True
     assert manifest["samples"]["ordered_hashes"] == []
+
+
+def test_id_preview_can_be_disabled_without_changing_sample_digests() -> None:
+    source = _source(
+        [{"id": f"customer-{index}", "input": f"prompt-{index}"} for index in range(12)]
+    )
+
+    with_preview = build_manifest(source)
+    without_preview = build_manifest(source, include_id_preview=False)
+
+    assert without_preview["samples"]["id_preview"] == {"first": [], "last": []}
+    assert without_preview["samples"]["ordered_hashes"] == with_preview["samples"]["ordered_hashes"]
+    assert without_preview["samples"]["ordered_digest"] == with_preview["samples"]["ordered_digest"]
+    assert (
+        without_preview["samples"]["unordered_digest"]
+        == with_preview["samples"]["unordered_digest"]
+    )
+    assert without_preview["samples"]["field_digests"] == with_preview["samples"]["field_digests"]
 
 
 def test_write_and_read_manifest_round_trip(tmp_path: Path) -> None:

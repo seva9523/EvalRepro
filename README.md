@@ -73,6 +73,10 @@ evalrepro snapshot jsonl baseline.jsonl --name arithmetic-v1 -o baseline.manifes
 evalrepro snapshot jsonl candidate.jsonl --name arithmetic-v1 -o candidate.manifest.json
 ```
 
+If sample IDs should not appear in a published manifest, add `--no-id-preview` to either snapshot
+command. The IDs still contribute to the sample digests, so this changes the diagnostic presentation
+only.
+
 Compare them:
 
 ```bash
@@ -151,10 +155,11 @@ contract and data path** so score changes can be interpreted with greater confid
 
 ## Security and privacy
 
-Manifests contain hashes, compact ID previews, runtime details, and provenance. They do not contain
-raw sample text. Hashes of small or predictable values can still be brute-forced and ID previews can
-be sensitive. Do not publish manifests from confidential evaluations without reviewing or removing
-those fields. See [`SECURITY.md`](SECURITY.md) and [`METHODOLOGY.md`](METHODOLOGY.md).
+Manifests contain hashes, compact ID previews by default, runtime details, and provenance. They do not
+contain raw sample text. Hashes of small or predictable values can still be brute-forced and ID
+previews can be sensitive. Use `--no-id-preview` when the preview should be omitted, and do not
+publish manifests from confidential evaluations without reviewing the remaining fields. See
+[`docs/privacy.md`](docs/privacy.md), [`SECURITY.md`](SECURITY.md), and [`METHODOLOGY.md`](METHODOLOGY.md).
 
 ## Licence
 

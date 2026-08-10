@@ -61,6 +61,11 @@ def build_parser() -> argparse.ArgumentParser:
     jsonl.add_argument("--fields", type=_fields, default=("input", "target", "choices", "metadata"))
     jsonl.add_argument("--id-field", default="id")
     jsonl.add_argument("--limit", type=_positive_limit)
+    jsonl.add_argument(
+        "--no-id-preview",
+        action="store_true",
+        help="Omit sample ID values from the manifest while retaining them in sample hashes",
+    )
 
     inspect = snapshot_adapters.add_parser("inspect", help="Snapshot an Inspect task dataset")
     inspect.add_argument("task", help="Task factory as package.module:function")
@@ -71,6 +76,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     inspect.add_argument("--id-field", default="id")
     inspect.add_argument("--limit", type=_positive_limit)
+    inspect.add_argument(
+        "--no-id-preview",
+        action="store_true",
+        help="Omit sample ID values from the manifest while retaining them in sample hashes",
+    )
 
     compare = commands.add_parser("compare", help="Compare two manifests")
     compare.add_argument("baseline", type=Path)
@@ -100,7 +110,10 @@ def main(argv: Sequence[str] | None = None) -> int:
                 fields=args.fields,
                 id_field=args.id_field or None,
             )
-            write_manifest(args.output, build_manifest(source, args.limit))
+            write_manifest(
+                args.output,
+                build_manifest(source, args.limit, include_id_preview=not args.no_id_preview),
+            )
             print(f"Wrote {args.output}")
             return 0
 
@@ -111,7 +124,10 @@ def main(argv: Sequence[str] | None = None) -> int:
                 fields=args.fields,
                 id_field=args.id_field or None,
             )
-            write_manifest(args.output, build_manifest(source, args.limit))
+            write_manifest(
+                args.output,
+                build_manifest(source, args.limit, include_id_preview=not args.no_id_preview),
+            )
             print(f"Wrote {args.output}")
             return 0
 
