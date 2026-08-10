@@ -5,6 +5,8 @@ uses semantic versioning once the manifest and adapter contracts reach stability
 
 ## [Unreleased]
 
+## [0.1.0a1] - 2026-08-10
+
 ### Added
 
 - Hash-only manifest schema v1.
@@ -13,3 +15,16 @@ uses semantic versioning once the manifest and adapter contracts reach stability
 - Text, JSON, and Markdown reports with CI-friendly exit codes.
 - Composite GitHub Action.
 - Founding Inspect Evals dependency-reproducibility case study.
+- `--no-id-preview` for JSONL and Inspect snapshots, contributed by
+  [`@uuzzrm`](https://github.com/uuzzrm), so published manifests can omit diagnostic identifiers
+  without weakening semantic drift detection.
+
+### Validation
+
+- Python 3.11, 3.12, and 3.13 CI.
+- Ruff formatting and linting.
+- Strict mypy checks.
+- 54 offline tests and 96.22% branch coverage after the first external contribution.
+- Source distribution and wheel builds.
+
+[0.1.0a1]: https://github.com/seva9523/EvalRepro/releases/tag/v0.1.0a1
