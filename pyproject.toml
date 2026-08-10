@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "evalrepro"
-version = "0.1.0a1"
+version = "0.1.0a2"
 description = "Detect semantic drift in AI evaluation inputs and contracts"
 readme = "README.md"
 requires-python = ">=3.11"

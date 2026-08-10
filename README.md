@@ -53,20 +53,20 @@ reproducible | order drift | semantic drift
 Install the public alpha from PyPI:
 
 ```bash
-python -m pip install "evalrepro==0.1.0a1"
+python -m pip install "evalrepro==0.1.0a2"
 ```
 
 For the optional Inspect adapter:
 
 ```bash
-python -m pip install "evalrepro[inspect]==0.1.0a1"
+python -m pip install "evalrepro[inspect]==0.1.0a2"
 ```
 
 To install the same immutable release directly from source:
 
 ```bash
 python -m pip install \
-  "evalrepro @ git+https://github.com/seva9523/EvalRepro.git@v0.1.0a1"
+  "evalrepro @ git+https://github.com/seva9523/EvalRepro.git@v0.1.0a2"
 ```
 
 ## Quick start: JSONL
@@ -115,9 +115,8 @@ image content is represented by a content digest instead of an environment-speci
 
 ## Quick start: Harvey LAB
 
-The Harvey LAB adapter is planned for the next package release. From a source checkout containing
-the adapter, it reads a local benchmark checkout without importing the Harvey harness or running a
-model or judge.
+The first-party Harvey LAB adapter reads a local benchmark checkout without importing the Harvey
+harness or running a model or judge.
 
 ```bash
 evalrepro snapshot harvey-lab ./harvey-labs \
@@ -144,7 +143,7 @@ safety, and current semantic decisions.
 Use the immutable public-alpha tag:
 
 ```yaml
-- uses: seva9523/EvalRepro@v0.1.0a1
+- uses: seva9523/EvalRepro@v0.1.0a2
   with:
     baseline: artifacts/baseline.json
     candidate: artifacts/candidate.json
