@@ -1,6 +1,6 @@
 # Inspect Evals: `datasets` 4.8.5 → 5.0.1
 
-**Status:** fork-validated; not yet upstream-accepted.
+**Status:** upstream draft PR open and under review; not yet accepted or merged.
 
 ## Question
 
@@ -31,6 +31,10 @@ source provenance. Focused tests and a mock-model smoke run supplemented the dat
 
 - Comparator tests passed in both dependency environments.
 - Repository quality gate, Ruff, and mypy passed in the fork-side validation workflow.
+- After automated review feedback, the tool was documented in `tools/README.md`, its tests were moved
+  to `tests/tools/`, and the investigation-only root note was removed.
+- The current upstream PR head passed focused Ruff, mypy, 17 tests, Markdown checks, and the full
+  repository `make check` gate in a fork-side verification workflow.
 - No explicit `streaming=True` use was found under Inspect Evals source/package paths; this matters
   because Datasets 5 changed streaming shuffle behaviour.
 - Representative candidate-version tests and a SciKnowEval mock-model smoke run passed.
@@ -38,9 +42,14 @@ source provenance. Focused tests and a mock-model smoke run supplemented the dat
 ## Evidence
 
 - Upstream tracking issue: https://github.com/UKGovernmentBEIS/inspect_evals/issues/2049
+- Upstream draft PR: https://github.com/UKGovernmentBEIS/inspect_evals/pull/2113
 - Contribution branch: https://github.com/seva9523/inspect_evals/tree/investigate/datasets-5-reproducibility
 - Fork-side validation PR: https://github.com/seva9523/inspect_evals/pull/1
-- Compared contribution revision: `3d9d1afdad953523b5869463456494761f2d06ae`
+- Full-matrix contribution revision: `3d9d1afdad953523b5869463456494761f2d06ae`
+- Current upstream PR head after convention fixes: `868c78821687c73e97175e4549100affefa99f76`
+
+The upstream PR remains a draft. An open draft PR and automated review are not evidence of maintainer
+acceptance. This status must be updated only after a human upstream review or merge.
 
 ## Interpretation
 
