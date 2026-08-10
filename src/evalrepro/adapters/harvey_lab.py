@@ -75,9 +75,7 @@ def _deliverables(value: Any, *, source: Path) -> dict[str, str]:
     if not isinstance(value, Mapping) or not all(
         isinstance(key, str) and isinstance(item, str) for key, item in value.items()
     ):
-        raise AdapterError(
-            f"{source}: deliverables must be an object mapping strings to strings."
-        )
+        raise AdapterError(f"{source}: deliverables must be an object mapping strings to strings.")
     return dict(cast(Mapping[str, str], value))
 
 
@@ -238,9 +236,7 @@ def _task_record(
     task_dir = config_path.parent
     task_id = task_dir.relative_to(tasks_root).as_posix()
     if len(Path(task_id).parts) < 2:
-        raise AdapterError(
-            f"Harvey LAB task ID must have at least two path segments: {task_id}"
-        )
+        raise AdapterError(f"Harvey LAB task ID must have at least two path segments: {task_id}")
 
     config = _read_json_object(config_path)
     raw_docs_dir = config.get("docs_dir") or "documents"
@@ -330,9 +326,7 @@ def _discover(root: Path, selector: str) -> tuple[Path, list[Path]]:
             selected.append(path)
 
     if not selected:
-        raise AdapterError(
-            f"No Harvey LAB tasks matched selector {selector!r} under {tasks_root}."
-        )
+        raise AdapterError(f"No Harvey LAB tasks matched selector {selector!r} under {tasks_root}.")
     return tasks_root, selected
 
 
@@ -391,9 +385,7 @@ def _project_version(root: Path) -> str | None:
 def _provenance(root: Path, selected_count: int) -> dict[str, Any]:
     git_root = root if (root / ".git").exists() else None
     status = (
-        _run_git(root, "status", "--porcelain", "--untracked-files=normal")
-        if git_root
-        else None
+        _run_git(root, "status", "--porcelain", "--untracked-files=normal") if git_root else None
     )
     tags = _run_git(root, "tag", "--points-at", "HEAD") if git_root else None
     return {
@@ -428,8 +420,7 @@ def harvey_lab_source(path: Path, *, task: str = "all") -> SnapshotSource:
     tasks_root, configs = _discover(root, selector)
     inventory_cache: dict[Path, DocumentInventory] = {}
     records = [
-        _task_record(root, tasks_root, config_path, inventory_cache)
-        for config_path in configs
+        _task_record(root, tasks_root, config_path, inventory_cache) for config_path in configs
     ]
     return SnapshotSource(
         adapter="harvey-lab",
