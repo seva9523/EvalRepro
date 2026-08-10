@@ -86,6 +86,12 @@ def test_all_tasks_are_sorted_hash_only_and_fallback_matches_inline(tmp_path: Pa
         "zeta/task-2",
     ]
     assert compare_manifest_data(left_manifest, right_manifest).verdict is Verdict.REPRODUCIBLE
+    source = harvey_lab_source(left)
+    records = list(source.records)
+    inventory = records[0]["metadata"]["source_documents"]
+    assert inventory["count"] == 1
+    assert inventory["total_bytes"] == len(b"alpha")
+    assert len(inventory["ordered_digest"]) == 64
     dumped = json.dumps(left_manifest)
     assert "Same instructions" not in dumped
     assert "PASS if issue found" not in dumped
@@ -437,7 +443,7 @@ def test_non_object_config_symlink_config_and_duplicate_discovery(
     real_config = root2 / "real-task.json"
     real_config.write_text("{}")
     (task_dir2 / "task.json").symlink_to(real_config)
-    with pytest.raises(AdapterError, match="task configs must not be symbolic links"):
+    with pytest.raises(AdapterError, match="task config must not use symbolic links"):
         harvey_lab_source(root2)
 
     root3 = tmp_path / "duplicate"
@@ -453,3 +459,22 @@ def test_non_object_config_symlink_config_and_duplicate_discovery(
     monkeypatch.setattr(Path, "rglob", duplicate_rglob)
     with pytest.raises(AdapterError, match="Duplicate Harvey LAB task ID"):
         adapter._discover(root3.resolve(), "all")
+
+
+def test_selector_canonicalisation_and_remote_sanitisation(tmp_path: Path) -> None:
+    write_task(tmp_path, "contracts/task-a")
+
+    windows_style = manifest(tmp_path, r"contracts\task-a")
+    canonical = manifest(tmp_path, "./contracts/task-a/")
+
+    assert compare_manifest_data(windows_style, canonical).verdict is Verdict.REPRODUCIBLE
+    assert adapter._sanitise_remote("git@github.com:harveyai/harvey-labs.git") == (
+        "github.com:harveyai/harvey-labs.git"
+    )
+    assert adapter._sanitise_remote(
+        "https://user:secret@example.com:invalid/harveyai/harvey-labs.git?token=x"
+    ) == "https://example.com/harveyai/harvey-labs.git"
+    assert adapter._sanitise_remote("https:///missing-host") is None
+
+    with pytest.raises(AdapterError, match="must not contain '..'"):
+        harvey_lab_source(tmp_path, task="../contracts")
