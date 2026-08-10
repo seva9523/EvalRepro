@@ -50,6 +50,34 @@ def test_cli_allow_drift_returns_success(tmp_path: Path) -> None:
     assert main(["compare", str(left), str(right), "--allow-drift", "--quiet"]) == 0
 
 
+def test_cli_no_id_preview_preserves_hashes(tmp_path: Path) -> None:
+    source = tmp_path / "source.jsonl"
+    source.write_text('{"id":"private-case-1","input":"a"}\n')
+    with_preview = tmp_path / "with-preview.json"
+    without_preview = tmp_path / "without-preview.json"
+
+    assert main(["snapshot", "jsonl", str(source), "-o", str(with_preview)]) == 0
+    assert (
+        main(
+            [
+                "snapshot",
+                "jsonl",
+                str(source),
+                "-o",
+                str(without_preview),
+                "--no-id-preview",
+            ]
+        )
+        == 0
+    )
+
+    visible = json.loads(with_preview.read_text())
+    private = json.loads(without_preview.read_text())
+    assert visible["samples"]["id_preview"]["first"] == ["private-case-1"]
+    assert private["samples"]["id_preview"] == {"first": [], "last": []}
+    assert private["samples"]["ordered_hashes"] == visible["samples"]["ordered_hashes"]
+
+
 def test_cli_bad_jsonl_returns_user_error(tmp_path: Path, capsys: object) -> None:
     source = tmp_path / "broken.jsonl"
     source.write_text("not-json\n")

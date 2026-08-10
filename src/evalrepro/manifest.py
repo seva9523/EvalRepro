@@ -42,7 +42,12 @@ def _preview(values: Sequence[Any], width: int = 5) -> dict[str, list[Any]]:
     return {"first": list(values[:width]), "last": list(values[-width:])}
 
 
-def build_manifest(source: SnapshotSource, sample_limit: int | None = None) -> dict[str, Any]:
+def build_manifest(
+    source: SnapshotSource,
+    sample_limit: int | None = None,
+    *,
+    include_id_preview: bool = True,
+) -> dict[str, Any]:
     """Create a hash-only manifest from an adapter-provided record stream."""
     if sample_limit is not None and sample_limit <= 0:
         raise ManifestError("sample_limit must be a positive integer or None.")
@@ -61,7 +66,8 @@ def build_manifest(source: SnapshotSource, sample_limit: int | None = None) -> d
         value = normalise(sample, source.normalisation_policy)
         sample_hashes.append(digest(value))
         if isinstance(value, Mapping):
-            sample_ids.append(value.get(source.id_field) if source.id_field else None)
+            if include_id_preview:
+                sample_ids.append(value.get(source.id_field) if source.id_field else None)
             for key, item in value.items():
                 type_counts.setdefault(str(key), Counter()).update([_type_name(item)])
             for field in source.fields:
@@ -102,7 +108,7 @@ def build_manifest(source: SnapshotSource, sample_limit: int | None = None) -> d
             "ordered_digest": sequence_digest(sample_hashes),
             "unordered_digest": sequence_digest(sorted(sample_hashes)),
             "ordered_hashes": sample_hashes,
-            "id_preview": _preview(sample_ids),
+            "id_preview": _preview(sample_ids) if include_id_preview else {"first": [], "last": []},
             "top_level_type_summary": type_summary,
             "field_digests": {
                 field: {
