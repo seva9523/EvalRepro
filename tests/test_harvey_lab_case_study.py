@@ -59,8 +59,7 @@ def test_source_compare_url_uses_selected_revisions() -> None:
     candidate = "2" * 40
 
     assert _source_compare_url(baseline, candidate) == (
-        "https://github.com/harveyai/harvey-labs/compare/"
-        f"{baseline}...{candidate}"
+        f"https://github.com/harveyai/harvey-labs/compare/{baseline}...{candidate}"
     )
 
 
