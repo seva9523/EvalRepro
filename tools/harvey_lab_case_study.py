@@ -11,7 +11,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from evalrepro import __version__
 from evalrepro.adapters.harvey_lab import ADAPTER_CONTRACT_VERSION, harvey_lab_source
 from evalrepro.compare import Comparison, Verdict, compare_manifest_data
 from evalrepro.manifest import MANIFEST_SCHEMA_VERSION, build_manifest, write_manifest
@@ -65,7 +64,10 @@ def _run_git(repository: Path, *args: str) -> str:
 def _checkout_revision(repository: Path, revision: str) -> None:
     if len(revision) != 40 or any(character not in "0123456789abcdef" for character in revision):
         raise RuntimeError(f"Harvey LAB revision must be a full lowercase commit SHA: {revision}")
-    _run_git(repository, "checkout", "--detach", "--force", revision)
+    status = _run_git(repository, "status", "--porcelain", "--untracked-files=normal")
+    if status:
+        raise RuntimeError("Harvey LAB checkout must be clean before changing revisions.")
+    _run_git(repository, "checkout", "--detach", revision)
     actual = _run_git(repository, "rev-parse", "HEAD")
     if actual != revision:
         raise RuntimeError(f"Harvey LAB checkout mismatch: expected {revision}, got {actual}")
@@ -286,6 +288,11 @@ def run_case_study(
     )
     comparison, comparison_payload = _compare_snapshots(baseline, candidate)
     _assert_expected_case(baseline, candidate, comparison, comparison_payload)
+    stable_comparison = {
+        key: value
+        for key, value in comparison_payload.items()
+        if key not in {"baseline_runtime", "candidate_runtime"}
+    }
 
     summary: dict[str, Any] = {
         "case_study": "harvey-lab-firm-knowledge-v3-rubric",
@@ -294,13 +301,12 @@ def run_case_study(
         "selector": selector,
         "external_review_status": "not_upstream_reviewed",
         "evalrepro": {
-            "version": __version__,
             "manifest_schema_version": MANIFEST_SCHEMA_VERSION,
             "adapter_contract_version": ADAPTER_CONTRACT_VERSION,
         },
         "baseline": _public_snapshot(baseline),
         "candidate": _public_snapshot(candidate),
-        "comparison": comparison_payload,
+        "comparison": stable_comparison,
         "limitations": [
             "This compares task contracts and source-document bytes, not model or judge outputs.",
             "Semantic drift does not establish whether the candidate rubric is better or worse.",
