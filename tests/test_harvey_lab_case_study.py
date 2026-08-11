@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import subprocess
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -10,6 +12,7 @@ from evalrepro.manifest import build_manifest
 from tools.harvey_lab_case_study import (
     DocumentStats,
     RevisionSnapshot,
+    _checkout_revision,
     _compare_snapshots,
     _document_stats,
 )
@@ -84,3 +87,30 @@ def test_compare_snapshots_rejects_task_id_changes() -> None:
 
     with pytest.raises(RuntimeError, match="same ordered task IDs"):
         _compare_snapshots(baseline, candidate)
+
+
+def test_checkout_revision_preserves_dirty_worktree(tmp_path: Path) -> None:
+    repository = tmp_path / "harvey-labs"
+    repository.mkdir()
+    subprocess.run(["git", "init", "-b", "main"], cwd=repository, check=True)
+    subprocess.run(["git", "config", "user.name", "Test"], cwd=repository, check=True)
+    subprocess.run(
+        ["git", "config", "user.email", "test@example.com"], cwd=repository, check=True
+    )
+    source = repository / "source.txt"
+    source.write_text("committed", encoding="utf-8")
+    subprocess.run(["git", "add", "source.txt"], cwd=repository, check=True)
+    subprocess.run(["git", "commit", "-m", "fixture"], cwd=repository, check=True)
+    revision = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=repository,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    source.write_text("local work", encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="clean before changing revisions"):
+        _checkout_revision(repository, revision)
+
+    assert source.read_text(encoding="utf-8") == "local work"
