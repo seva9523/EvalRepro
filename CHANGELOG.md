@@ -16,7 +16,7 @@ uses semantic versioning once the manifest and adapter contracts reach stability
 - Consecutive Harvey LAB revisions `55510f0e...` and `60071cc4...`: 250 complete task contracts
   over the same 9,288-file, 520,597,269-byte DMS corpus; 250 changed task contracts; semantic drift
   isolated to `input` and `target`.
-- Python 3.11, 3.12, and 3.13 CI with 75 network-free tests.
+- Python 3.11, 3.12, and 3.13 CI with 76 network-free tests.
 
 ## [0.1.0a2] - 2026-08-10
 
