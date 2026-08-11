@@ -163,6 +163,19 @@ choices, metadata, types, task scope, and provenance matched exactly. The case s
 [`case-studies/inspect-datasets-5.md`](case-studies/inspect-datasets-5.md). Its status is explicitly
 recorded as **fork-validated**, not upstream-accepted.
 
+## Harvey LAB pinned-revision case study
+
+An opt-in workflow compared Harvey LAB firm-knowledge revisions
+`55510f0e609ffa5cf6f5df17d9a813ce4bb33d0c` and
+`60071cc424d6479569626b8c76d90b958fe2d6c0`. Both manifests covered 250 task contracts and the
+same shared DMS inventory of 9,288 files (520,597,269 bytes). EvalRepro classified
+**250 of 250 task contracts** as changed, isolated the drift to `input` and `target`, and returned
+`semantic_drift`; scope, coverage, `choices`, `metadata`, and top-level field types matched.
+
+The [case study and hash-only evidence](case-studies/harvey-lab-v3-rubric/README.md) are
+EvalRepro workflow-validated, not upstream-reviewed or upstream-merged. No Harvey adoption or
+endorsement is claimed.
+
 ## Built-in adapters
 
 - Generic JSON Lines
