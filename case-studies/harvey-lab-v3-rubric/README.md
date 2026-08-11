@@ -49,7 +49,7 @@ The opt-in GitHub workflow is
 
 ## Verified result
 
-The exact-head [workflow run](https://github.com/seva9523/EvalRepro/actions/runs/31488262148)
+A verified [workflow run](https://github.com/seva9523/EvalRepro/actions/runs/31488789107)
 completed successfully on Python 3.12 using EvalRepro `0.1.0a2`, manifest schema v1, and Harvey LAB
 adapter contract v1.
 
@@ -83,9 +83,9 @@ or call a model/provider API. Published manifests contain task hashes and aggreg
 raw instructions, rubrics, document paths, or document bytes. Hashes are not anonymisation; this
 case uses Harvey LAB's public synthetic benchmark only.
 
-The stable summary and comparison were reproduced byte-for-byte in separate workflow runs. Any
-later Harvey outreach should ask for semantic review of this concrete method and result, not
-promotion.
+The semantic summary and comparison values were reproduced in separate workflow runs. The committed
+stable summary intentionally excludes runtime-specific Python/platform fields. Any later Harvey
+outreach should ask for semantic review of this concrete method and result, not promotion.
 
 ## Limitations
 
