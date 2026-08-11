@@ -1,7 +1,7 @@
 # Harvey LAB: firm-knowledge v3 rubric update
 
-**Status:** reproducible workflow prepared; the first exact run and checked-in result are required
-before this case is complete. No upstream review, adoption, or endorsement is claimed.
+**Status:** EvalRepro workflow-validated; not upstream-reviewed or upstream-merged. No Harvey
+adoption or endorsement is claimed.
 
 ## Question
 
@@ -47,6 +47,35 @@ python tools/harvey_lab_case_study.py \
 The opt-in GitHub workflow is
 [`harvey-lab-case-study.yml`](../../.github/workflows/harvey-lab-case-study.yml).
 
+## Verified result
+
+The exact-head [workflow run](https://github.com/seva9523/EvalRepro/actions/runs/31488262148)
+completed successfully on Python 3.12 using EvalRepro `0.1.0a2`, manifest schema v1, and Harvey LAB
+adapter contract v1.
+
+| Evidence | Baseline | Candidate | Comparison |
+| --- | ---: | ---: | --- |
+| Pinned revision | `55510f0e…` | `60071cc4…` | Candidate is one commit ahead |
+| Complete task contracts | 250 | 250 | Scope and coverage match |
+| Shared DMS inventory | 9,288 files | 9,288 files | Exact digest match |
+| Shared DMS bytes | 520,597,269 | 520,597,269 | Exact match |
+| Changed task contracts | — | — | **250 of 250** |
+| Changed semantic fields | — | — | `input`, `target` |
+| Unchanged semantic fields | — | — | `choices`, `metadata` |
+| Verdict | — | — | **`semantic_drift`** |
+
+Top-level field types also matched. Both manifests were complete, came from clean exact-revision
+checkouts, contained 250 ordered task hashes, and had empty task-ID previews.
+
+## Published evidence
+
+- [Stable machine-readable summary](results/summary.json)
+- [Human-readable summary](results/summary.md)
+- [Machine-readable comparison](results/comparison.json)
+- [Markdown comparison report](results/comparison.md)
+- [Baseline hash-only manifest](results/baseline.manifest.json)
+- [Candidate hash-only manifest](results/candidate.manifest.json)
+
 ## Privacy and execution boundary
 
 The run does not import Harvey LAB modules, install its dependencies, execute an agent, run a judge,
@@ -54,13 +83,9 @@ or call a model/provider API. Published manifests contain task hashes and aggreg
 raw instructions, rubrics, document paths, or document bytes. Hashes are not anonymisation; this
 case uses Harvey LAB's public synthetic benchmark only.
 
-## Result gate
-
-Before this case is described as complete, the exact workflow must succeed and its hash-only
-manifests, machine-readable comparison, stable summary, and human-readable report must be reviewed
-and checked into `results/`. Only then should issue #13 and the top-level project documentation be
-updated. Any later Harvey outreach should ask for semantic review of this concrete method and result,
-not promotion.
+The stable summary and comparison were reproduced byte-for-byte in separate workflow runs. Any
+later Harvey outreach should ask for semantic review of this concrete method and result, not
+promotion.
 
 ## Limitations
 
