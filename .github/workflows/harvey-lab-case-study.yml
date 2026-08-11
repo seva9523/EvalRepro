@@ -1,0 +1,99 @@
+name: Harvey LAB pinned-revision case study
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/harvey-lab-case-study.yml"
+      - "case-studies/harvey-lab-v3-rubric/**"
+      - "tools/harvey_lab_case_study.py"
+      - "tests/test_harvey_lab_case_study.py"
+      - "src/evalrepro/adapters/harvey_lab.py"
+      - "src/evalrepro/compare.py"
+      - "src/evalrepro/manifest.py"
+      - "src/evalrepro/report.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: harvey-lab-case-study-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pinned-revisions:
+    name: Firm knowledge v3 rubric
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      BASELINE_REVISION: 55510f0e609ffa5cf6f5df17d9a813ce4bb33d0c
+      CANDIDATE_REVISION: 60071cc424d6479569626b8c76d90b958fe2d6c0
+
+    steps:
+      - name: Checkout EvalRepro
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install EvalRepro
+        run: python -m pip install --disable-pip-version-check -e .
+
+      - name: Fetch the pinned Harvey LAB source slice
+        shell: bash
+        run: |
+          set -euo pipefail
+          harvey_repo="${RUNNER_TEMP}/harvey-labs"
+          git init "$harvey_repo"
+          git -C "$harvey_repo" remote add origin https://github.com/harveyai/harvey-labs.git
+          git -C "$harvey_repo" sparse-checkout init --no-cone
+          {
+            printf '/pyproject.toml\n'
+            printf '/tasks/firm-knowledge/\n'
+          } >"${harvey_repo}/.git/info/sparse-checkout"
+          git -C "$harvey_repo" fetch \
+            --filter=blob:none \
+            --no-tags \
+            --depth=2 \
+            origin \
+            "$CANDIDATE_REVISION"
+          test "$(git -C "$harvey_repo" rev-parse "${CANDIDATE_REVISION}^")" = \
+            "$BASELINE_REVISION"
+          git -C "$harvey_repo" checkout --detach "$BASELINE_REVISION"
+          printf 'HARVEY_LAB_REPO=%s\n' "$harvey_repo" >>"$GITHUB_ENV"
+          printf 'CASE_OUTPUT=%s\n' "${RUNNER_TEMP}/harvey-lab-case-study" >>"$GITHUB_ENV"
+
+      - name: Run hash-only comparison
+        run: |
+          python tools/harvey_lab_case_study.py \
+            --repository "$HARVEY_LAB_REPO" \
+            --baseline "$BASELINE_REVISION" \
+            --candidate "$CANDIDATE_REVISION" \
+            --selector firm-knowledge \
+            --output "$CASE_OUTPUT"
+
+      - name: Add result to job summary
+        shell: bash
+        run: cat "$CASE_OUTPUT/summary.md" >>"$GITHUB_STEP_SUMMARY"
+
+      - name: Verify committed stable summary
+        shell: bash
+        run: |
+          if [[ -f case-studies/harvey-lab-v3-rubric/results/summary.json ]]; then
+            diff -u \
+              case-studies/harvey-lab-v3-rubric/results/summary.json \
+              "$CASE_OUTPUT/summary.json"
+          fi
+
+      - name: Upload hash-only evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: harvey-lab-v3-rubric-${{ github.sha }}
+          path: ${{ env.CASE_OUTPUT }}/
+          if-no-files-found: error
+          retention-days: 30
