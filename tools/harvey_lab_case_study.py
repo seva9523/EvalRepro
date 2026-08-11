@@ -181,9 +181,7 @@ def _compare_snapshots(
     candidate_hashes = candidate.manifest["samples"]["ordered_hashes"]
     changed_task_count = sum(
         baseline_hash != candidate_hash
-        for baseline_hash, candidate_hash in zip(
-            baseline_hashes, candidate_hashes, strict=True
-        )
+        for baseline_hash, candidate_hash in zip(baseline_hashes, candidate_hashes, strict=True)
     )
     comparison = compare_manifest_data(baseline.manifest, candidate.manifest)
     payload = comparison.to_dict()
