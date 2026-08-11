@@ -43,7 +43,7 @@ jobs:
         run: ruff check .
 
       - name: Type check
-        run: mypy src/evalrepro
+        run: mypy src/evalrepro tools/harvey_lab_case_study.py
 
       - name: Test
         run: pytest --cov=evalrepro --cov-report=term-missing
