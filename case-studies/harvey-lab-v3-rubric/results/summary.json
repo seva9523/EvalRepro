@@ -1,0 +1,91 @@
+{
+  "baseline": {
+    "document_corpora": 1,
+    "document_inventory_digests": [
+      "8c6ad817230b8e85c40460b950d8f3a31a996f329a46e1e26bd25ad76addfe38"
+    ],
+    "ordered_task_digest": "3a3c9d33d6933e17ab084e1078de5d40728e87dda24b42e25175b63348ac9263",
+    "revision": "55510f0e609ffa5cf6f5df17d9a813ce4bb33d0c",
+    "scope_digest": "bee6c47a65fa6986341bd15a9742b653fb53ea449506ce12e9d03cc32565fa4e",
+    "source_document_bytes": 520597269,
+    "source_document_count": 9288,
+    "task_count": 250,
+    "unordered_task_digest": "fbbd39ddc7629744a6692c00ad3cfb85de18217ae98078bdac9dad630d1ee8fa"
+  },
+  "candidate": {
+    "document_corpora": 1,
+    "document_inventory_digests": [
+      "8c6ad817230b8e85c40460b950d8f3a31a996f329a46e1e26bd25ad76addfe38"
+    ],
+    "ordered_task_digest": "11f5953830ce895dfb0f9191c872e617224ca38d33026b89042455bd8dbfb536",
+    "revision": "60071cc424d6479569626b8c76d90b958fe2d6c0",
+    "scope_digest": "bee6c47a65fa6986341bd15a9742b653fb53ea449506ce12e9d03cc32565fa4e",
+    "source_document_bytes": 520597269,
+    "source_document_count": 9288,
+    "task_count": 250,
+    "unordered_task_digest": "50c1bc8d3c6624321e8e80ae67d803e9730355bf3c391eae38471aa6e9eb7951"
+  },
+  "case_study": "harvey-lab-firm-knowledge-v3-rubric",
+  "comparison": {
+    "added_sample_hashes": 250,
+    "baseline_coverage": {
+      "complete": true,
+      "declared_count": 250,
+      "processed_count": 250,
+      "sample_limit": null
+    },
+    "candidate_coverage": {
+      "complete": true,
+      "declared_count": 250,
+      "processed_count": 250,
+      "sample_limit": null
+    },
+    "changed_task_count": 250,
+    "coverage_match": true,
+    "field_matches": {
+      "choices": {
+        "ordered": true,
+        "unordered": true
+      },
+      "input": {
+        "ordered": false,
+        "unordered": false
+      },
+      "metadata": {
+        "ordered": true,
+        "unordered": true
+      },
+      "target": {
+        "ordered": false,
+        "unordered": false
+      }
+    },
+    "first_ordered_mismatch": 0,
+    "notes": [
+      "Sample membership or sample content changed.",
+      "Semantic fields changed: input, target."
+    ],
+    "ordered_samples_match": false,
+    "removed_sample_hashes": 250,
+    "reproducible": false,
+    "scope_match": true,
+    "top_level_types_match": true,
+    "unchanged_task_count": 0,
+    "unordered_samples_match": false,
+    "verdict": "semantic_drift"
+  },
+  "evalrepro": {
+    "adapter_contract_version": 1,
+    "manifest_schema_version": 1
+  },
+  "external_review_status": "not_upstream_reviewed",
+  "limitations": [
+    "This compares task contracts and source-document bytes, not model or judge outputs.",
+    "Semantic drift does not establish whether the candidate rubric is better or worse.",
+    "The result applies only to the two pinned revisions and the firm-knowledge selector.",
+    "No Harvey maintainer review, adoption, or endorsement is claimed."
+  ],
+  "selector": "firm-knowledge",
+  "source_compare": "https://github.com/harveyai/harvey-labs/compare/55510f0e609ffa5cf6f5df17d9a813ce4bb33d0c...60071cc424d6479569626b8c76d90b958fe2d6c0",
+  "source_repository": "https://github.com/harveyai/harvey-labs"
+}

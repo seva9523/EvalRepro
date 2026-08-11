@@ -1,6 +1,6 @@
 # Harvey LAB adapter design
 
-Status: implemented in adapter contract version 1; public pinned-revision case study pending
+Status: implemented in adapter contract version 1; public pinned-revision case study completed
 
 Tracking issue: [#13](https://github.com/seva9523/EvalRepro/issues/13)
 
@@ -192,9 +192,11 @@ network access, model execution, or judge execution.
 
 ## Public case study gate
 
-The first public case study should compare two immutable Harvey LAB revisions and publish exact
-revisions, adapter/schema versions, task and document counts, the comparison verdict, aggregate
-changed-task counts, commands, and limitations. It must not publish raw task or document content.
+The completed [firm-knowledge v3 rubric case study](../../case-studies/harvey-lab-v3-rubric/README.md)
+compares two immutable Harvey LAB revisions and publishes exact revisions, adapter/schema versions,
+task and document counts, the comparison verdict, aggregate changed-task counts, commands, hash-only
+manifests, and limitations. It does not publish raw task or document content. The result is
+EvalRepro workflow-validated, not upstream-reviewed or upstream-merged.
 
 No Harvey LAB issue or pull request should be opened until the adapter is merged, a pinned-revision
 case is reproducible, and the result can be presented as a request for semantic review rather
