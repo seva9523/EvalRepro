@@ -220,8 +220,8 @@ def _assert_expected_case(
         raise RuntimeError("The pinned v3 update should change task rubrics.")
     if not isinstance(comparison_payload.get("changed_task_count"), int):
         raise RuntimeError("The changed-task count is missing from the comparison summary.")
-    if comparison_payload["changed_task_count"] <= 0:
-        raise RuntimeError("The pinned v3 update should change at least one task contract.")
+    if comparison_payload["changed_task_count"] != 250:
+        raise RuntimeError("The pinned v3 update should change all 250 task contracts.")
 
 
 def _render_summary(summary: Mapping[str, Any]) -> str:
