@@ -34,19 +34,11 @@
       "processed_count": 250,
       "sample_limit": null
     },
-    "baseline_runtime": {
-      "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
-      "python": "3.12.13"
-    },
     "candidate_coverage": {
       "complete": true,
       "declared_count": 250,
       "processed_count": 250,
       "sample_limit": null
-    },
-    "candidate_runtime": {
-      "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
-      "python": "3.12.13"
     },
     "changed_task_count": 250,
     "coverage_match": true,
@@ -84,8 +76,7 @@
   },
   "evalrepro": {
     "adapter_contract_version": 1,
-    "manifest_schema_version": 1,
-    "version": "0.1.0a2"
+    "manifest_schema_version": 1
   },
   "external_review_status": "not_upstream_reviewed",
   "limitations": [
