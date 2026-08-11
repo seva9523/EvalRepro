@@ -15,6 +15,7 @@ from tools.harvey_lab_case_study import (
     _checkout_revision,
     _compare_snapshots,
     _document_stats,
+    _source_compare_url,
 )
 
 
@@ -50,6 +51,16 @@ def _snapshot(revision: str, records: list[dict[str, Any]]) -> RevisionSnapshot:
         task_ids=tuple(record["id"] for record in records),
         documents=_document_stats(mapping_records),
         manifest=manifest,
+    )
+
+
+def test_source_compare_url_uses_selected_revisions() -> None:
+    baseline = "1" * 40
+    candidate = "2" * 40
+
+    assert _source_compare_url(baseline, candidate) == (
+        "https://github.com/harveyai/harvey-labs/compare/"
+        f"{baseline}...{candidate}"
     )
 
 
