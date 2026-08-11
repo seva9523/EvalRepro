@@ -20,7 +20,10 @@ BASELINE_REVISION = "55510f0e609ffa5cf6f5df17d9a813ce4bb33d0c"
 CANDIDATE_REVISION = "60071cc424d6479569626b8c76d90b958fe2d6c0"
 DEFAULT_SELECTOR = "firm-knowledge"
 SOURCE_REPOSITORY = "https://github.com/harveyai/harvey-labs"
-SOURCE_COMPARE = f"{SOURCE_REPOSITORY}/compare/{BASELINE_REVISION}...{CANDIDATE_REVISION}"
+
+
+def _source_compare_url(baseline_revision: str, candidate_revision: str) -> str:
+    return f"{SOURCE_REPOSITORY}/compare/{baseline_revision}...{candidate_revision}"
 
 
 @dataclass(frozen=True, slots=True)
@@ -297,7 +300,7 @@ def run_case_study(
     summary: dict[str, Any] = {
         "case_study": "harvey-lab-firm-knowledge-v3-rubric",
         "source_repository": SOURCE_REPOSITORY,
-        "source_compare": SOURCE_COMPARE,
+        "source_compare": _source_compare_url(baseline_revision, candidate_revision),
         "selector": selector,
         "external_review_status": "not_upstream_reviewed",
         "evalrepro": {
