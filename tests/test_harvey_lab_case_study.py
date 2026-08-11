@@ -94,9 +94,7 @@ def test_checkout_revision_preserves_dirty_worktree(tmp_path: Path) -> None:
     repository.mkdir()
     subprocess.run(["git", "init", "-b", "main"], cwd=repository, check=True)
     subprocess.run(["git", "config", "user.name", "Test"], cwd=repository, check=True)
-    subprocess.run(
-        ["git", "config", "user.email", "test@example.com"], cwd=repository, check=True
-    )
+    subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=repository, check=True)
     source = repository / "source.txt"
     source.write_text("committed", encoding="utf-8")
     subprocess.run(["git", "add", "source.txt"], cwd=repository, check=True)
