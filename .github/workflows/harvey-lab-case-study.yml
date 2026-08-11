@@ -8,10 +8,8 @@ on:
       - "case-studies/harvey-lab-v3-rubric/**"
       - "tools/harvey_lab_case_study.py"
       - "tests/test_harvey_lab_case_study.py"
-      - "src/evalrepro/adapters/harvey_lab.py"
-      - "src/evalrepro/compare.py"
-      - "src/evalrepro/manifest.py"
-      - "src/evalrepro/report.py"
+      - "pyproject.toml"
+      - "src/evalrepro/**"
 
 permissions:
   contents: read
