@@ -9,6 +9,7 @@
 - [x] Text, JSON, and Markdown reports
 - [x] GitHub Action
 - [x] Founding reproducibility case study
+- [x] Harvey LAB pinned-revision case study
 - [ ] External schema review
 - [ ] First external beta repository
 - [x] First external contributor
