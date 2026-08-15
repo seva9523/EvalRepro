@@ -82,7 +82,8 @@ It must:
 2. require `results.version` and explicitly support the tested v2/v3 summary shapes;
 3. require an array of stored results;
 4. require the definition fields needed for every canonical record;
-5. reject duplicate canonical record IDs;
+5. allow repeated canonical record IDs when the same executed definition appears more than once,
+   preserving each occurrence and its multiplicity/order;
 6. reject unsupported top-level or result shapes with a path-specific error;
 7. reject non-finite numbers and values that cannot be represented by EvalRepro's canonical JSON
    policy;
@@ -113,8 +114,10 @@ instead of `order_drift`.
 It must not use `result.id`, `evalId`, `evaluationId`, or `traceId`; those identify stored runs
 or telemetry rather than the test/prompt contract.
 
-The digest exists only as the record ID and optional diagnostic preview. Raw prompt, variable, test,
-assertion, or provider content is never copied into the manifest.
+The digest exists only as the record ID and optional diagnostic preview. It is a content identity, not
+a row key: repeated executions of an identical test/prompt/provider definition intentionally reuse the
+same ID. Each occurrence remains a separate ordered record, so multiplicity and repetition coverage are
+preserved. Raw prompt, variable, test, assertion, or provider content is never copied into the manifest.
 
 ## Record contract
 
@@ -227,7 +230,10 @@ these values it compares.
 The complete export result array defines the executed test-by-prompt matrix for version 1.
 
 - the adapter preserves Promptfoo's stored result order;
-- the canonical record ID is independent of that order;
+- the canonical record ID is independent of that order and may repeat for identical executed
+  definitions;
+- repeated identical definitions remain separate records, so a repetition-count change produces
+  `coverage_mismatch`;
 - equal definitions in a different order should produce `order_drift`;
 - a missing or added executed combination in two complete exports should produce
   `coverage_mismatch`;
@@ -286,6 +292,8 @@ mutations:
 | Promptfoo/Node/platform version changed, definition equal | `reproducible` |
 | test or prompt order changed | `order_drift` |
 | executed combination added or removed from complete export | `coverage_mismatch` |
+| repeated identical combination retained with the same multiplicity/order | `reproducible` |
+| repetition count changed for an otherwise identical combination | `coverage_mismatch` |
 | prompt text or prompt configuration changed | `semantic_drift` |
 | vars or test metadata changed | `semantic_drift` |
 | assertion, threshold, transform, or grader configuration changed | `semantic_drift` |
