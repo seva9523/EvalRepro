@@ -49,6 +49,12 @@ jobs:
           assert report["verdict"] == "semantic_drift", report
           assert report["scope_match"] is True, report
           assert report["coverage_match"] is True, report
-          assert report["changed_task_count"] == 250, report
+          assert report["added_sample_hashes"] == 250, report
+          assert report["removed_sample_hashes"] == 250, report
+          for field in ("input", "target"):
+              assert report["field_matches"][field] == {
+                  "ordered": False,
+                  "unordered": False,
+              }, report
           assert "semantic_drift" in markdown_path.read_text()
           PY
