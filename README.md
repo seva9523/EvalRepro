@@ -28,6 +28,20 @@ reproducible | order drift | semantic drift
 > records are never written to a manifest, but hashes are not anonymisation; review the privacy notes
 > before publishing manifests from sensitive datasets.
 
+## 30-second terminal demo
+
+The recording snapshots two synthetic one-record JSONL evaluations and detects a target change as
+`semantic_drift`. The generated manifests contain hashes and compact diagnostics, not the raw sample
+text.
+
+Replay it locally with [asciinema](https://asciinema.org/):
+
+```bash
+asciinema play docs/terminal-demo.cast
+```
+
+[Download the terminal recording](docs/terminal-demo.cast).
+
 ## What EvalRepro checks
 
 - evaluation identity, task version, adapter parameters, and selected semantic fields;
