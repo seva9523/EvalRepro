@@ -170,8 +170,12 @@ Semantic scope contains:
 - mode `definition`;
 - semantic field mapping;
 - record-identity policy;
-- definition-extra and unsupported-media policies;
-- complete or partial coverage selection.
+- definition-extra and unsupported-media policies.
+
+Completeness, an applied `--limit`, selected record count, and any covered range belong in the
+standard manifest `coverage` object, not semantic scope. This preserves EvalRepro's normal verdict
+precedence: comparing complete and partial selections yields `coverage_mismatch`, not
+`scope_mismatch`.
 
 The following belong in provenance rather than semantic scope:
 
@@ -235,13 +239,17 @@ The complete export result array defines the executed test-by-prompt matrix for 
 - repeated identical definitions remain separate records, so a repetition-count change produces
   `coverage_mismatch`;
 - equal definitions in a different order should produce `order_drift`;
-- a missing or added executed combination in two complete exports should produce
+- a missing or added executed combination that changes the complete record count should produce
   `coverage_mismatch`;
+- replacing one executed combination with another while the complete record count stays equal
+  should produce `semantic_drift`, because coverage metadata still matches while the unordered
+  semantic digest changes;
 - a definition mutation should produce `semantic_drift`;
 - a different `--name`, mode, or adapter contract should produce `scope_mismatch`.
 
-If the user applies `--limit`, the manifest is partial and uses the standard EvalRepro coverage
-rules.
+If the user applies `--limit`, the manifest is partial and records that selection only in the
+standard EvalRepro coverage object. Complete-versus-partial and incompatible partial selections use
+the standard coverage rules and produce `coverage_mismatch` before semantic comparison.
 
 ## Normalisation policy
 
@@ -291,7 +299,8 @@ mutations:
 | generated IDs/timestamps/author/share URL changed | `reproducible` |
 | Promptfoo/Node/platform version changed, definition equal | `reproducible` |
 | test or prompt order changed | `order_drift` |
-| executed combination added or removed from complete export | `coverage_mismatch` |
+| executed combination added or removed so complete record count changes | `coverage_mismatch` |
+| one executed combination replaced by another at equal complete count | `semantic_drift` |
 | repeated identical combination retained with the same multiplicity/order | `reproducible` |
 | repetition count changed for an otherwise identical combination | `coverage_mismatch` |
 | prompt text or prompt configuration changed | `semantic_drift` |
