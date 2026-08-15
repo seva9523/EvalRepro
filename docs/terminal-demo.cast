@@ -1,9 +1,9 @@
 {"version":2,"width":96,"height":28,"timestamp":1786809600,"env":{"SHELL":"/bin/bash","TERM":"xterm-256color"},"title":"EvalRepro: detect semantic drift in 30 seconds"}
 [0.25,"o","$ evalrepro --version\r\n"]
 [0.55,"o","evalrepro 0.1.0a2\r\n"]
-[1.15,"o","$ evalrepro snapshot jsonl demo/baseline.jsonl --name arithmetic-v1 -o baseline.manifest.json\r\n"]
+[1.15,"o","$ evalrepro snapshot jsonl examples/terminal-demo/baseline.jsonl --name arithmetic-v1 -o baseline.manifest.json\r\n"]
 [1.65,"o","Wrote baseline.manifest.json\r\n"]
-[2.25,"o","$ evalrepro snapshot jsonl demo/candidate.jsonl --name arithmetic-v1 -o candidate.manifest.json\r\n"]
+[2.25,"o","$ evalrepro snapshot jsonl examples/terminal-demo/candidate.jsonl --name arithmetic-v1 -o candidate.manifest.json\r\n"]
 [2.75,"o","Wrote candidate.manifest.json\r\n"]
 [3.35,"o","$ evalrepro compare baseline.manifest.json candidate.manifest.json --allow-drift\r\n"]
 [3.8,"o","EvalRepro verdict: semantic_drift\r\n"]
