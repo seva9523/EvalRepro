@@ -32,7 +32,7 @@ reproducible | order drift | semantic drift
 
 The recording snapshots two synthetic one-record JSONL evaluations and detects a target change as
 `semantic_drift`. The generated manifests contain hashes and compact diagnostics, not the raw sample
-text.
+text. The exact synthetic inputs are committed in [`examples/terminal-demo/`](examples/terminal-demo/).
 
 Replay it locally with [asciinema](https://asciinema.org/):
 
