@@ -1,0 +1,92 @@
+name: Awesome Agentic Engineering pinned-release case study
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/agentic-engineering-case-study.yml"
+      - "case-studies/awesome-agentic-engineering-v0-16/**"
+      - "tools/agentic_engineering_case_study.py"
+      - "tests/test_agentic_engineering_case_study.py"
+      - "pyproject.toml"
+      - "src/evalrepro/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agentic-engineering-case-study-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pinned-releases:
+    name: Public file contract v0.15.0 to v0.16.0
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BASELINE_REVISION: d3bafb19c06bd493b43188675cf7b7fd4dbf3065
+      CANDIDATE_REVISION: 7edabb8a76a225fd035b13f33f0b997c03175016
+
+    steps:
+      - name: Checkout EvalRepro
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install EvalRepro
+        run: python -m pip install --disable-pip-version-check -e .
+
+      - name: Fetch the pinned public source revisions
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_repo="${RUNNER_TEMP}/awesome-agentic-engineering"
+          git init "$source_repo"
+          git -C "$source_repo" remote add origin \
+            https://github.com/lindixu6-hash/awesome-agentic-engineering.git
+          git -C "$source_repo" fetch \
+            --filter=blob:none \
+            --no-tags \
+            --depth=5 \
+            origin \
+            "$CANDIDATE_REVISION"
+          test "$(git -C "$source_repo" rev-parse "$BASELINE_REVISION")" = \
+            "$BASELINE_REVISION"
+          git -C "$source_repo" merge-base --is-ancestor \
+            "$BASELINE_REVISION" "$CANDIDATE_REVISION"
+          printf 'SOURCE_REPO=%s\n' "$source_repo" >>"$GITHUB_ENV"
+          printf 'CASE_OUTPUT=%s\n' \
+            "${RUNNER_TEMP}/agentic-engineering-case-study" >>"$GITHUB_ENV"
+
+      - name: Run hash-only comparison
+        run: |
+          python tools/agentic_engineering_case_study.py \
+            --repository "$SOURCE_REPO" \
+            --baseline "$BASELINE_REVISION" \
+            --candidate "$CANDIDATE_REVISION" \
+            --output "$CASE_OUTPUT"
+
+      - name: Add result to job summary
+        shell: bash
+        run: cat "$CASE_OUTPUT/summary.md" >>"$GITHUB_STEP_SUMMARY"
+
+      - name: Verify committed stable summary
+        shell: bash
+        run: |
+          diff -u \
+            case-studies/awesome-agentic-engineering-v0-16/results/summary.json \
+            "$CASE_OUTPUT/summary.json"
+
+      - name: Upload hash-only evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: agentic-engineering-v0-16-${{ github.sha }}
+          path: ${{ env.CASE_OUTPUT }}/
+          if-no-files-found: error
+          retention-days: 30

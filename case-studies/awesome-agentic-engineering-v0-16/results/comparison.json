@@ -1,0 +1,54 @@
+{
+  "added_sample_hashes": 3,
+  "baseline_coverage": {
+    "complete": true,
+    "declared_count": 8,
+    "processed_count": 8,
+    "sample_limit": null
+  },
+  "baseline_runtime": {},
+  "candidate_coverage": {
+    "complete": true,
+    "declared_count": 8,
+    "processed_count": 8,
+    "sample_limit": null
+  },
+  "candidate_runtime": {},
+  "changed_paths": [
+    "starters/read-only/agent-readiness.yml",
+    "starters/draft-only/agent-readiness.yml",
+    "starters/state-changing/agent-readiness.yml"
+  ],
+  "coverage_match": true,
+  "field_matches": {
+    "choices": {
+      "ordered": true,
+      "unordered": true
+    },
+    "input": {
+      "ordered": false,
+      "unordered": false
+    },
+    "metadata": {
+      "ordered": true,
+      "unordered": true
+    },
+    "target": {
+      "ordered": true,
+      "unordered": true
+    }
+  },
+  "first_ordered_mismatch": 3,
+  "notes": [
+    "Sample membership or sample content changed.",
+    "Semantic fields changed: input."
+  ],
+  "ordered_samples_match": false,
+  "removed_sample_hashes": 3,
+  "reproducible": false,
+  "scope_match": true,
+  "top_level_types_match": true,
+  "unchanged_path_count": 5,
+  "unordered_samples_match": false,
+  "verdict": "semantic_drift"
+}

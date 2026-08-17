@@ -1,0 +1,99 @@
+{
+  "manifest_schema_version": 1,
+  "generated_at_utc": "2026-08-17T06:51:52+00:00",
+  "tool": {
+    "name": "evalrepro",
+    "version": "0.1.0a2"
+  },
+  "runtime": {},
+  "scope": {
+    "adapter": "case-study-public-files",
+    "fields": [
+      "input",
+      "target",
+      "choices",
+      "metadata"
+    ],
+    "id_field": "id",
+    "identity": {
+      "repository": "https://github.com/lindixu6-hash/awesome-agentic-engineering"
+    },
+    "parameters": {
+      "artifact_paths": [
+        "starters/read-only/agent-card.json",
+        "starters/draft-only/agent-card.json",
+        "starters/state-changing/agent-card.json",
+        "starters/read-only/agent-readiness.yml",
+        "starters/draft-only/agent-readiness.yml",
+        "starters/state-changing/agent-readiness.yml",
+        "evals/prompt-injection/fixtures.jsonl",
+        "schema/agent-card.schema.json"
+      ],
+      "contract_version": 1
+    }
+  },
+  "scope_digest": "c28a0ea06a3fab93a8d7b41fffc14f026cd1fda7e61799effb0475b79b1c1151",
+  "provenance": {
+    "git_commit": "7edabb8a76a225fd035b13f33f0b997c03175016",
+    "source_repository": "https://github.com/lindixu6-hash/awesome-agentic-engineering"
+  },
+  "coverage": {
+    "declared_count": 8,
+    "processed_count": 8,
+    "complete": true,
+    "sample_limit": null
+  },
+  "samples": {
+    "ordered_digest": "77309adf648a9b5f460324ba39e7dd80910ad3c04592301c82d0434e109defb5",
+    "unordered_digest": "83d13e166553c9252cd16d9c900434dffc1836c8b699cff80b13ec08520b4ce9",
+    "ordered_hashes": [
+      "4f4e549f5aa66782a0ece2b2953572e6a106c99dae1bdb398fc87b1fc66e0a79",
+      "34e61c62d3bc5b5fbabc5645a8afdf293d982bbbff04c15fd0b29fa6b0888e08",
+      "74e4559fc02cd3f7b30e3256f69c57e8bddea38921a1e9860367dd6f6f7af757",
+      "5df4da5ee729f05421acb79a70397349620e1ba4987c066abafda097658fefe8",
+      "5e84fe782be12f69a48606f2621650fdba3a3ea34d9d820d5ae8d21b7e02e779",
+      "a8016bba92ea585e6d1080b7cee45e9de5e1fc983458f96feb3081bdc93cf2dc",
+      "a39dbd7664689c014aa20c296081ed825aef099ea4ed8ca5333f596d9c1d5ff9",
+      "593f12bf1f7b552de3e3c81728ad32b58aa3bc743dbb23ceaec4f535e78adf85"
+    ],
+    "id_preview": {
+      "first": [],
+      "last": []
+    },
+    "top_level_type_summary": {
+      "choices": {
+        "null": 8
+      },
+      "id": {
+        "string": 8
+      },
+      "input": {
+        "object": 8
+      },
+      "metadata": {
+        "object": 8
+      },
+      "target": {
+        "null": 8
+      }
+    },
+    "field_digests": {
+      "input": {
+        "ordered": "54133b8c35a1ce27455fc1e64f781fbbed2f4d22240fab08db7c4c82a7563c96",
+        "unordered": "13e586fd581816b1e1dcdda93904a4ff5c7377caa80a945d1e0b55c4fe36788f"
+      },
+      "target": {
+        "ordered": "8cf286502cb5f53b12341c982d79940e46573d6a477fa5fa1a277469f4a9bb1f",
+        "unordered": "8cf286502cb5f53b12341c982d79940e46573d6a477fa5fa1a277469f4a9bb1f"
+      },
+      "choices": {
+        "ordered": "8cf286502cb5f53b12341c982d79940e46573d6a477fa5fa1a277469f4a9bb1f",
+        "unordered": "8cf286502cb5f53b12341c982d79940e46573d6a477fa5fa1a277469f4a9bb1f"
+      },
+      "metadata": {
+        "ordered": "d1317e63643546cb9e1f23fdb0fb22f4c82898763207c8291463ced204244780",
+        "unordered": "7b61a49f9ca579330a76d6884c57f1ad5be1f0fbf4da2feb2f823ed9cd9260a5"
+      }
+    }
+  }
+}
