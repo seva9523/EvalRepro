@@ -1,0 +1,91 @@
+name: Reproducibility check request
+description: Give us two public revisions; the maintainer will assess and, when suitable, reproduce the evaluation-contract comparison.
+title: "[Reproducibility check]: "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Provide two exact public revisions and the contract you expect to stay stable. You do not need to install EvalRepro first. Suitable cases may receive a hash-only comparison, documented limitations, and an optional integration proposal. Selection is based on reproducibility, public evidence, safety, and maintainer capacity; submission does not guarantee acceptance or a delivery date.
+  - type: input
+    id: repository
+    attributes:
+      label: Public repository or workflow
+      description: Link to the public repository, paper workflow, or evaluation source.
+      placeholder: https://github.com/owner/repository
+    validations:
+      required: true
+  - type: input
+    id: baseline
+    attributes:
+      label: Baseline revision
+      description: Supply an immutable full commit SHA, release tag, dataset revision, or package version.
+      placeholder: Full SHA or exact version
+    validations:
+      required: true
+  - type: input
+    id: candidate
+    attributes:
+      label: Candidate revision
+      description: Supply the exact revision that should be compared with the baseline.
+      placeholder: Full SHA or exact version
+    validations:
+      required: true
+  - type: textarea
+    id: contract
+    attributes:
+      label: Evaluation contract
+      description: Which tasks, datasets, prompts, rubrics, schemas, configs, or public files should be compared?
+      placeholder: List the narrowest useful set and any fields that should remain stable.
+    validations:
+      required: true
+  - type: textarea
+    id: risk
+    attributes:
+      label: Drift risk or question
+      description: What silent change are you trying to rule in or out, and what result do you expect?
+      placeholder: We expect sample membership and targets to stay fixed while...
+    validations:
+      required: true
+  - type: dropdown
+    id: public_data
+    attributes:
+      label: Public reproducibility
+      description: Can every required source and revision be accessed without credentials or restricted data?
+      options:
+        - "Yes"
+        - "No"
+        - "Not sure"
+    validations:
+      required: true
+  - type: dropdown
+    id: relationship
+    attributes:
+      label: Your relationship to the source
+      description: This helps us distinguish maintainer-submitted, user-submitted, and exploratory cases.
+      options:
+        - Maintainer or contributor
+        - User or researcher
+        - Independent observer
+    validations:
+      required: true
+  - type: dropdown
+    id: publication
+    attributes:
+      label: Public evidence
+      description: May EvalRepro reference the repository and publish non-sensitive aggregate findings and hash-only artifacts?
+      options:
+        - "Yes"
+        - "Yes, after I review the draft"
+        - "No"
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety and permissions
+      options:
+        - label: I have not posted credentials, confidential records, private manifests, personal data, or restricted dataset contents.
+          required: true
+        - label: I understand that hashes are not anonymisation and that submission does not imply adoption, endorsement, or guaranteed acceptance.
+          required: true
