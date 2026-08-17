@@ -190,6 +190,16 @@ The [case study and hash-only evidence](case-studies/harvey-lab-v3-rubric/README
 EvalRepro workflow-validated, not upstream-reviewed or upstream-merged. No Harvey adoption or
 endorsement is claimed.
 
+## Request a reproducibility check
+
+Upgrading a dataset, dependency, task configuration, rubric, schema, or evaluation framework? Give
+the project a public source and two exact revisions. You do not need to install EvalRepro first.
+Suitable public-alpha cases may receive a bounded hash-only comparison, documented limitations, and
+an optional integration proposal.
+
+[Submit a reproducibility check](https://github.com/seva9523/EvalRepro/issues/new/choose) or read the
+[Reproducibility Clinic](docs/reproducibility-clinic.md) scope and selection criteria.
+
 ## Built-in adapters
 
 - Generic JSON Lines
