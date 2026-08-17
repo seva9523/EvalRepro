@@ -1,0 +1,104 @@
+{
+  "baseline": {
+    "artifact_count": 8,
+    "git_blob_shas": {
+      "evals/prompt-injection/fixtures.jsonl": "7d23df04f007b29b756c1bf2b70d5f09a9379262",
+      "schema/agent-card.schema.json": "2ba494d5048c66cfc65ab529cb22c62435fd52bc",
+      "starters/draft-only/agent-card.json": "ae163eb7e245495aa806b544ad40ff36a58f63f2",
+      "starters/draft-only/agent-readiness.yml": "d6c113213700797941ec8c31cacf3d80810fead3",
+      "starters/read-only/agent-card.json": "91e2758d5a5fd4f3219306090238bc47ab344dd6",
+      "starters/read-only/agent-readiness.yml": "b168543200aa6c0dee2572a52f21d08902847dae",
+      "starters/state-changing/agent-card.json": "5f7a2d1970880b763ad9b4185cb3e943dd0cb523",
+      "starters/state-changing/agent-readiness.yml": "33217988783f3b10bdd8174248325085cbdc21f4"
+    },
+    "ordered_artifact_digest": "0a7848f4f157cc16ac23abe6bc54ffd6638ed2a1caf28971df0077a36e23041c",
+    "revision": "d3bafb19c06bd493b43188675cf7b7fd4dbf3065",
+    "scope_digest": "c28a0ea06a3fab93a8d7b41fffc14f026cd1fda7e61799effb0475b79b1c1151",
+    "unordered_artifact_digest": "0578d55b9eb06d344194c9924ea3c3b934ae2593f9f41b28b8a8d96fd54d3955"
+  },
+  "candidate": {
+    "artifact_count": 8,
+    "git_blob_shas": {
+      "evals/prompt-injection/fixtures.jsonl": "7d23df04f007b29b756c1bf2b70d5f09a9379262",
+      "schema/agent-card.schema.json": "2ba494d5048c66cfc65ab529cb22c62435fd52bc",
+      "starters/draft-only/agent-card.json": "ae163eb7e245495aa806b544ad40ff36a58f63f2",
+      "starters/draft-only/agent-readiness.yml": "1b5aea913d3aafa9603bfda55dadf5807db5e4bc",
+      "starters/read-only/agent-card.json": "91e2758d5a5fd4f3219306090238bc47ab344dd6",
+      "starters/read-only/agent-readiness.yml": "2ea03d6dc9810f13f4efd4f1d3b430d39c86f728",
+      "starters/state-changing/agent-card.json": "5f7a2d1970880b763ad9b4185cb3e943dd0cb523",
+      "starters/state-changing/agent-readiness.yml": "ceb809bde9b3eb297af6f1770b30623965982eec"
+    },
+    "ordered_artifact_digest": "77309adf648a9b5f460324ba39e7dd80910ad3c04592301c82d0434e109defb5",
+    "revision": "7edabb8a76a225fd035b13f33f0b997c03175016",
+    "scope_digest": "c28a0ea06a3fab93a8d7b41fffc14f026cd1fda7e61799effb0475b79b1c1151",
+    "unordered_artifact_digest": "83d13e166553c9252cd16d9c900434dffc1836c8b699cff80b13ec08520b4ce9"
+  },
+  "case_study": "awesome-agentic-engineering-v0.15.0-to-v0.16.0",
+  "comparison": {
+    "added_sample_hashes": 3,
+    "baseline_coverage": {
+      "complete": true,
+      "declared_count": 8,
+      "processed_count": 8,
+      "sample_limit": null
+    },
+    "candidate_coverage": {
+      "complete": true,
+      "declared_count": 8,
+      "processed_count": 8,
+      "sample_limit": null
+    },
+    "changed_paths": [
+      "starters/read-only/agent-readiness.yml",
+      "starters/draft-only/agent-readiness.yml",
+      "starters/state-changing/agent-readiness.yml"
+    ],
+    "coverage_match": true,
+    "field_matches": {
+      "choices": {
+        "ordered": true,
+        "unordered": true
+      },
+      "input": {
+        "ordered": false,
+        "unordered": false
+      },
+      "metadata": {
+        "ordered": true,
+        "unordered": true
+      },
+      "target": {
+        "ordered": true,
+        "unordered": true
+      }
+    },
+    "first_ordered_mismatch": 3,
+    "notes": [
+      "Sample membership or sample content changed.",
+      "Semantic fields changed: input."
+    ],
+    "ordered_samples_match": false,
+    "removed_sample_hashes": 3,
+    "reproducible": false,
+    "scope_match": true,
+    "top_level_types_match": true,
+    "unchanged_path_count": 5,
+    "unordered_samples_match": false,
+    "verdict": "semantic_drift"
+  },
+  "design_partner_status": "public-case-submitted",
+  "evalrepro": {
+    "case_study_contract_version": 1,
+    "manifest_schema_version": 1,
+    "version": "0.1.0a2"
+  },
+  "limitations": [
+    "This compares bytes for eight selected public files, not executed agent behaviour.",
+    "The result does not cover other files changed between the two repository revisions.",
+    "Expected workflow drift records a dependency-pin hardening; it does not rate quality.",
+    "No project adoption, endorsement, or broad compatibility claim is made."
+  ],
+  "source_compare": "https://github.com/lindixu6-hash/awesome-agentic-engineering/compare/d3bafb19c06bd493b43188675cf7b7fd4dbf3065...7edabb8a76a225fd035b13f33f0b997c03175016",
+  "source_repository": "https://github.com/lindixu6-hash/awesome-agentic-engineering",
+  "validation_status": "evalrepro-project-validated"
+}
