@@ -46,7 +46,14 @@ which may contain memory addresses or omit semantics.
 
 Adapters may define narrowly scoped volatility policies. The Inspect adapter removes IDs from
 message-shaped `{id, role, content}` objects because those IDs are generated at runtime. It does not
-remove sample IDs. Local image paths are replaced with file-content digests where readable.
+remove sample IDs. Local image/file paths are replaced with content digests only when the file is
+readable; same bytes at different paths hash identically, different bytes do not, and missing or
+unreadable paths fall back to the original path string rather than silently dropping it.
+
+Ordinary metadata values remain path-sensitive by default: different path texts or different path
+objects stay different unless an adapter explicitly classifies the value as local content. Windows
+and UNC path strings are preserved as exact text representations rather than being rewritten in a
+host-dependent way.
 
 ## Verdict precedence
 

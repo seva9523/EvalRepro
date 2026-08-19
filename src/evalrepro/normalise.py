@@ -27,7 +27,7 @@ class NormalisationPolicy:
     digest_local_content_files: bool = True
 
 
-def _content_file(value: Any, policy: NormalisationPolicy) -> Any:
+def _content_file(value: Any, policy: NormalisationPolicy) -> Any:  # Digest and Path
     if not policy.digest_local_content_files or not isinstance(value, str):
         return value
 
