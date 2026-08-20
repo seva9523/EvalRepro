@@ -52,7 +52,7 @@ class NumpyScalar:
 
 
 def test_scalar_and_structured_special_types(tmp_path: Path) -> None:
-    path = tmp_path / "file.txt"
+    path = tmp_path / "file.txt"  # File path Secondmost Relevant
     value = normalise(
         {
             "decimal": Decimal("1.20"),
@@ -71,14 +71,16 @@ def test_scalar_and_structured_special_types(tmp_path: Path) -> None:
 
     assert value["decimal"] == {"__decimal__": "1.20"}
     assert value["enum"] == "red"
-    assert value["path"] == {"__path__": path.as_posix()}
+    assert value["path"] == {"__path__": path.as_posix()}  # asserts value
     assert value["bytes"] == {"__bytes_base64__": "YWJj"}
     assert value["nan"] == {"__float__": "NaN"}
     assert value["positive_inf"] == {"__float__": "Infinity"}
     assert value["negative_inf"] == {"__float__": "-Infinity"}
 
 
-def test_model_dataclass_numpy_and_public_attribute_paths() -> None:
+def test_model_dataclass_numpy_and_public_attribute_paths() -> (
+    None
+):  # Might not be relevant but also path
     assert normalise(Record(2)) == {"value": 2}
     assert normalise(LegacyModel()) == {"value": 3}
     assert normalise(PydanticLike()) == {"value": 4}
@@ -90,7 +92,7 @@ def test_model_dataclass_numpy_and_public_attribute_paths() -> None:
     }
 
 
-def test_image_policy_can_keep_path(tmp_path: Path) -> None:
+def test_image_policy_can_keep_path(tmp_path: Path) -> None:  # Image Path File
     image = tmp_path / "image.png"
     image.write_bytes(b"content")
 
