@@ -26,6 +26,18 @@ Please open an adapter proposal issue before writing substantial code. State the
 failure mode or use case, data objects involved, volatility that must be normalised, and how the
 adapter will be validated. Read [`docs/adapter-spec.md`](docs/adapter-spec.md).
 
+## Submit a reproducibility case
+
+You do not need to implement an adapter or install EvalRepro before proposing a public case. Use the
+**Reproducibility check request** issue form and provide a public source, exact baseline and candidate
+revisions, a narrow evaluation contract, and the drift risk you want to test. The maintainer may
+perform the first bounded comparison through the
+[Reproducibility Clinic](docs/reproducibility-clinic.md).
+
+Accepted cases still require external review before they are described as independently validated.
+A completed comparison is not evidence of downstream adoption unless the submitting project installs
+or repeatedly uses EvalRepro.
+
 ## Development
 
 ```bash
