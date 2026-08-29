@@ -40,9 +40,33 @@ or repeatedly uses EvalRepro.
 
 ## Development
 
+EvalRepro supports Python 3.11 through 3.13. Create the virtual environment first:
+
 ```bash
 python -m venv .venv
+```
+
+Activate it on POSIX shells:
+
+```bash
 source .venv/bin/activate
+```
+
+On Windows PowerShell:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+On Windows Command Prompt:
+
+```batch
+.venv\Scripts\activate.bat
+```
+
+Then install the development dependencies and run the existing quality checks:
+
+```bash
 python -m pip install -e ".[dev]"
 ruff format .
 ruff check .
