@@ -33,6 +33,19 @@ reproducible | order drift | semantic drift
 The recording snapshots two synthetic one-record JSONL evaluations and detects a target change as
 `semantic_drift`. The generated manifests contain hashes and compact diagnostics, not the raw sample
 text. The exact synthetic inputs are committed in [`examples/terminal-demo/`](examples/terminal-demo/).
+No real evaluation records or credentials are used.
+
+Run the same comparison directly:
+
+```bash
+evalrepro snapshot jsonl examples/terminal-demo/baseline.jsonl --name arithmetic-v1 -o baseline.manifest.json
+evalrepro snapshot jsonl examples/terminal-demo/candidate.jsonl --name arithmetic-v1 -o candidate.manifest.json
+evalrepro compare baseline.manifest.json candidate.manifest.json --allow-drift
+```
+
+The expected verdict is `semantic_drift` because only the synthetic `target` changes between the two
+fixtures. Without `--allow-drift`, `evalrepro compare` exits with status `2` when drift is detected,
+which is inconvenient in a shell running with `set -e`.
 
 Replay it locally with [asciinema](https://asciinema.org/):
 
