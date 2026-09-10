@@ -42,14 +42,87 @@ def test_cli_snapshot_validate_and_compare(tmp_path: Path, capsys: object) -> No
 
 
 def test_cli_allow_drift_returns_success(tmp_path: Path) -> None:
-    source = tmp_path / "source.jsonl"
-    source.write_text('{"id":"1","input":"a"}\n')
+    baseline_source = tmp_path / "baseline.jsonl"
+    candidate_source = tmp_path / "candidate.jsonl"
+    baseline_source.write_text('{"id":"1","input":"a","target":"x"}\n')
+    candidate_source.write_text('{"id":"1","input":"a","target":"y"}\n')
     left = tmp_path / "left.json"
     right = tmp_path / "right.json"
-    assert main(["snapshot", "jsonl", str(source), "-o", str(left), "--name", "left"]) == 0
-    assert main(["snapshot", "jsonl", str(source), "-o", str(right), "--name", "right"]) == 0
+    report_json = tmp_path / "report.json"
 
-    assert main(["compare", str(left), str(right), "--allow-drift", "--quiet"]) == 0
+    assert main(["snapshot", "jsonl", str(baseline_source), "-o", str(left)]) == 0
+    assert main(["snapshot", "jsonl", str(candidate_source), "-o", str(right)]) == 0
+
+    assert main(["compare", str(left), str(right)]) == 2
+    assert (
+        main(
+            [
+                "compare",
+                str(left),
+                str(right),
+                "--allow-drift",
+                "--json",
+                str(report_json),
+            ]
+        )
+        == 0
+    )
+    report_data = json.loads(report_json.read_text())
+    assert report_data["verdict"] == "semantic_drift"
+    assert report_data["reproducible"] is False
+
+
+def test_cli_quiet_suppresses_stdout_and_writes_reports(tmp_path: Path, capsys: object) -> None:
+    baseline_source = tmp_path / "baseline.jsonl"
+    candidate_source = tmp_path / "candidate.jsonl"
+    baseline_source.write_text('{"id":"1","input":"a","target":"x"}\n')
+    candidate_source.write_text('{"id":"1","input":"a","target":"y"}\n')
+    left = tmp_path / "left.json"
+    right = tmp_path / "right.json"
+    report_json = tmp_path / "report.json"
+    report_markdown = tmp_path / "report.md"
+
+    assert main(["snapshot", "jsonl", str(baseline_source), "-o", str(left)]) == 0
+    assert main(["snapshot", "jsonl", str(candidate_source), "-o", str(right)]) == 0
+
+    capsys.readouterr()  # type: ignore[attr-defined]
+    exit_code = main(
+        [
+            "compare",
+            str(left),
+            str(right),
+            "--quiet",
+            "--json",
+            str(report_json),
+            "--markdown",
+            str(report_markdown),
+        ]
+    )
+
+    captured = capsys.readouterr()  # type: ignore[attr-defined]
+    assert exit_code == 2
+    assert captured.out == ""
+    assert captured.err == ""
+    assert json.loads(report_json.read_text())["verdict"] == "semantic_drift"
+    assert "semantic_drift" in report_markdown.read_text()
+
+
+def test_cli_quiet_does_not_suppress_actionable_stderr(tmp_path: Path, capsys: object) -> None:
+    valid_source = tmp_path / "valid.jsonl"
+    valid_source.write_text('{"id":"1","input":"a"}\n')
+    valid_manifest = tmp_path / "valid.json"
+    invalid_manifest = tmp_path / "invalid.json"
+    invalid_manifest.write_text("{not-json\n")
+
+    assert main(["snapshot", "jsonl", str(valid_source), "-o", str(valid_manifest)]) == 0
+
+    capsys.readouterr()  # type: ignore[attr-defined]
+    exit_code = main(["compare", str(invalid_manifest), str(valid_manifest), "--quiet"])
+    captured = capsys.readouterr()  # type: ignore[attr-defined]
+
+    assert exit_code == 3
+    assert captured.out == ""
+    assert "Invalid JSON manifest" in captured.err
 
 
 def test_cli_no_id_preview_preserves_hashes(tmp_path: Path) -> None:
