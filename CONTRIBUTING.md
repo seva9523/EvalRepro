@@ -77,6 +77,20 @@ pytest --cov=evalrepro
 The test suite must remain network-free. Framework integrations that require downloads should use
 small synthetic fixtures in unit tests and document a separate opt-in smoke test.
 
+### Development troubleshooting
+
+- **Active interpreter verification**: Confirm the active interpreter and pip executable:
+  ```bash
+  python --version
+  python -m pip --version
+  ```
+  Ensure the active interpreter reports Python 3.11 through 3.13.
+- **Missing development tools (`ruff`, `mypy`, `pytest`)**: If any tool is reported as missing or not found, verify the virtual environment is activated and reinstall dependencies:
+  ```bash
+  python -m pip install -e ".[dev]"
+  ```
+- **PowerShell script execution policy errors**: If activating `.venv\Scripts\Activate.ps1` produces an execution policy restriction (`PSSecurityException`), use the documented Command Prompt alternative (`.venv\Scripts\activate.bat`) instead of weakening machine-wide execution policies.
+
 ## Pull requests
 
 - Keep one concern per PR.
