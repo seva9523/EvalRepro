@@ -28,3 +28,13 @@ def test_jsonl_adapter_reports_line_number(tmp_path: Path) -> None:
 
     with pytest.raises(AdapterError, match=r"broken\.jsonl:2"):
         jsonl_source(path)
+
+
+def test_jsonl_adapter_reports_missing_source(tmp_path: Path) -> None:
+    path = tmp_path / "missing.jsonl"
+
+    with pytest.raises(
+        AdapterError,
+        match=r"Cannot read JSONL source .*missing\.jsonl",
+    ):
+        jsonl_source(path)

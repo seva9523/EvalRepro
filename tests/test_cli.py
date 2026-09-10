@@ -163,6 +163,19 @@ def test_cli_bad_jsonl_returns_user_error(tmp_path: Path, capsys: object) -> Non
     assert "Invalid JSON" in capsys.readouterr().err  # type: ignore[attr-defined]
 
 
+def test_cli_missing_jsonl_source_returns_user_error(tmp_path: Path, capsys: object) -> None:
+    source = tmp_path / "missing.jsonl"
+    output = tmp_path / "out.json"
+
+    exit_code = main(["snapshot", "jsonl", str(source), "-o", str(output)])
+
+    captured = capsys.readouterr()  # type: ignore[attr-defined]
+    assert exit_code == 3
+    assert "Cannot read JSONL source" in captured.err
+    assert "missing.jsonl" in captured.err
+    assert not output.exists()
+
+
 def test_cli_validate_rejects_malformed_manifest_json(tmp_path: Path, capsys: object) -> None:
     manifest = tmp_path / "malformed.json"
     manifest.write_text("{not-json\n")
