@@ -37,7 +37,7 @@ def test_cli_snapshot_validate_and_compare(tmp_path: Path, capsys: object) -> No
 
     assert exit_code == 2
     assert json.loads(report_json.read_text())["verdict"] == "semantic_drift"
-    assert "semantic_drift" in report_markdown.read_text()
+    assert "semantic_drift" in report_markdown.read_text(encoding="utf-8")
     assert "EvalRepro verdict" in capsys.readouterr().out  # type: ignore[attr-defined]
 
 
@@ -141,3 +141,101 @@ def test_cli_compare_invalid_manifest_writes_no_reports(
     assert "Invalid JSON manifest" in capsys.readouterr().err  # type: ignore[attr-defined]
     assert not json_report.exists()
     assert not markdown_report.exists()
+
+
+def test_cli_compare_semantic_drift_allow_drift_and_quiet(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    baseline_data = tmp_path / "baseline.jsonl"
+    candidate_data = tmp_path / "candidate.jsonl"
+    baseline_manifest = tmp_path / "baseline.json"
+    candidate_manifest = tmp_path / "candidate.json"
+    report_json = tmp_path / "report.json"
+
+    baseline_data.write_text(
+        '{"id":"1","input":"prompt","target":"expected_a"}\n', encoding="utf-8"
+    )
+    candidate_data.write_text(
+        '{"id":"1","input":"prompt","target":"expected_b"}\n', encoding="utf-8"
+    )
+
+    assert main(["snapshot", "jsonl", str(baseline_data), "-o", str(baseline_manifest)]) == 0
+    assert main(["snapshot", "jsonl", str(candidate_data), "-o", str(candidate_manifest)]) == 0
+
+    # 1. Default comparison on semantic drift returns exit code 2 and prints text report
+    exit_code_default = main(
+        [
+            "compare",
+            str(baseline_manifest),
+            str(candidate_manifest),
+        ]
+    )
+    assert exit_code_default == 2
+    out_default = capsys.readouterr().out
+    assert "EvalRepro verdict: semantic_drift" in out_default
+
+    # 2. --allow-drift returns exit code 0 while keeping semantic_drift in reports
+    exit_code_allow_drift = main(
+        [
+            "compare",
+            str(baseline_manifest),
+            str(candidate_manifest),
+            "--allow-drift",
+            "--json",
+            str(report_json),
+        ]
+    )
+    assert exit_code_allow_drift == 0
+    allow_drift_data = json.loads(report_json.read_text(encoding="utf-8"))
+    assert allow_drift_data["verdict"] == "semantic_drift"
+    capsys.readouterr()
+
+    # 3. --quiet suppresses text report on stdout, while writing requested JSON and Markdown
+    quiet_report_json = tmp_path / "quiet_report.json"
+    quiet_report_markdown = tmp_path / "quiet_report.md"
+    exit_code_quiet = main(
+        [
+            "compare",
+            str(baseline_manifest),
+            str(candidate_manifest),
+            "--quiet",
+            "--json",
+            str(quiet_report_json),
+            "--markdown",
+            str(quiet_report_markdown),
+        ]
+    )
+    assert exit_code_quiet == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err == ""
+
+    assert quiet_report_json.exists()
+    assert quiet_report_markdown.exists()
+    assert json.loads(quiet_report_json.read_text(encoding="utf-8"))["verdict"] == "semantic_drift"
+    assert "semantic_drift" in quiet_report_markdown.read_text(encoding="utf-8")
+
+
+def test_cli_compare_quiet_preserves_actionable_stderr_errors(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    valid_source = tmp_path / "valid.jsonl"
+    valid_source.write_text('{"id":"1","input":"a"}\n', encoding="utf-8")
+    valid_manifest = tmp_path / "valid.json"
+    missing_manifest = tmp_path / "missing.json"
+
+    assert main(["snapshot", "jsonl", str(valid_source), "-o", str(valid_manifest)]) == 0
+    capsys.readouterr()
+
+    exit_code = main(
+        [
+            "compare",
+            str(valid_manifest),
+            str(missing_manifest),
+            "--quiet",
+        ]
+    )
+    assert exit_code == 3
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "Cannot read manifest" in captured.err
