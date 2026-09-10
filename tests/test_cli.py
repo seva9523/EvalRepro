@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from evalrepro.cli import main
 
 
@@ -86,3 +88,56 @@ def test_cli_bad_jsonl_returns_user_error(tmp_path: Path, capsys: object) -> Non
 
     assert exit_code == 3
     assert "Invalid JSON" in capsys.readouterr().err  # type: ignore[attr-defined]
+
+
+def test_cli_validate_rejects_malformed_manifest_json(tmp_path: Path, capsys: object) -> None:
+    manifest = tmp_path / "malformed.json"
+    manifest.write_text("{not-json\n")
+
+    assert main(["validate", str(manifest)]) == 3
+    assert "Invalid JSON manifest" in capsys.readouterr().err  # type: ignore[attr-defined]
+
+
+def test_cli_validate_rejects_structurally_invalid_manifest(tmp_path: Path, capsys: object) -> None:
+    manifest = tmp_path / "incomplete.json"
+    manifest.write_text(json.dumps({"manifest_schema_version": 1}))
+
+    assert main(["validate", str(manifest)]) == 3
+    assert "missing object 'runtime'" in capsys.readouterr().err  # type: ignore[attr-defined]
+
+
+@pytest.mark.parametrize("invalid_position", ["baseline", "candidate"])
+def test_cli_compare_invalid_manifest_writes_no_reports(
+    tmp_path: Path, capsys: object, invalid_position: str
+) -> None:
+    valid_source = tmp_path / "source.jsonl"
+    valid_manifest = tmp_path / "valid.json"
+    invalid_manifest = tmp_path / "invalid.json"
+    json_report = tmp_path / "report.json"
+    markdown_report = tmp_path / "report.md"
+    valid_source.write_text('{"id":"1","input":"a"}\n')
+    invalid_manifest.write_text("{not-json\n")
+    assert main(["snapshot", "jsonl", str(valid_source), "-o", str(valid_manifest)]) == 0
+
+    manifests = (
+        (invalid_manifest, valid_manifest)
+        if invalid_position == "baseline"
+        else (valid_manifest, invalid_manifest)
+    )
+    assert (
+        main(
+            [
+                "compare",
+                str(manifests[0]),
+                str(manifests[1]),
+                "--json",
+                str(json_report),
+                "--markdown",
+                str(markdown_report),
+            ]
+        )
+        == 3
+    )
+    assert "Invalid JSON manifest" in capsys.readouterr().err  # type: ignore[attr-defined]
+    assert not json_report.exists()
+    assert not markdown_report.exists()
