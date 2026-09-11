@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from evalrepro.cli import main
+from evalrepro.manifest import read_manifest
 
 
 def test_cli_snapshot_validate_and_compare(tmp_path: Path, capsys: object) -> None:
@@ -39,6 +40,56 @@ def test_cli_snapshot_validate_and_compare(tmp_path: Path, capsys: object) -> No
     assert json.loads(report_json.read_text())["verdict"] == "semantic_drift"
     assert "semantic_drift" in report_markdown.read_text()
     assert "EvalRepro verdict" in capsys.readouterr().out  # type: ignore[attr-defined]
+
+
+def test_cli_jsonl_snapshot_propagates_custom_options(tmp_path: Path) -> None:
+    source = tmp_path / "source.jsonl"
+    output = tmp_path / "manifest.json"
+    records = [
+        {
+            "id": f"default-{index}",
+            "case_id": f"case-{index}",
+            "answer": f"answer-{index}",
+            "prompt": f"question-{index}",
+            "metadata": {"row": index},
+        }
+        for index in range(1, 4)
+    ]
+    source.write_text("".join(json.dumps(record) + "\n" for record in records), encoding="utf-8")
+
+    assert (
+        main(
+            [
+                "snapshot",
+                "jsonl",
+                str(source),
+                "-o",
+                str(output),
+                "--name",
+                "custom-evaluation",
+                "--fields",
+                "prompt,answer",
+                "--id-field",
+                "case_id",
+                "--limit",
+                "2",
+            ]
+        )
+        == 0
+    )
+
+    manifest = read_manifest(output)
+    assert manifest["scope"]["identity"]["name"] == "custom-evaluation"
+    assert manifest["scope"]["fields"] == ["prompt", "answer"]
+    assert list(manifest["samples"]["field_digests"]) == ["prompt", "answer"]
+    assert manifest["scope"]["id_field"] == "case_id"
+    assert manifest["samples"]["id_preview"] == {"first": ["case-1", "case-2"], "last": []}
+    assert manifest["coverage"] == {
+        "declared_count": 3,
+        "processed_count": 2,
+        "complete": False,
+        "sample_limit": 2,
+    }
 
 
 def test_cli_allow_drift_returns_success(tmp_path: Path) -> None:
