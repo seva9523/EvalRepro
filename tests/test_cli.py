@@ -227,3 +227,15 @@ def test_cli_compare_invalid_manifest_writes_no_reports(
     assert "Invalid JSON manifest" in capsys.readouterr().err  # type: ignore[attr-defined]
     assert not json_report.exists()
     assert not markdown_report.exists()
+
+
+def test_cli_snapshot_jsonl_invalid_utf8_returns_error(tmp_path: Path, capsys: object) -> None:
+    source = tmp_path / "invalid_utf8.jsonl"
+    output = tmp_path / "manifest.json"
+    source.write_bytes(b'{"id": "1", "input": "\xff\xfe"}\n')
+
+    assert main(["snapshot", "jsonl", str(source), "-o", str(output)]) == 3
+    stderr = capsys.readouterr().err  # type: ignore[attr-defined]
+    assert "Cannot decode JSONL source" in stderr
+    assert "as UTF-8" in stderr
+    assert not output.exists()

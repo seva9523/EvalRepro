@@ -30,6 +30,8 @@ def jsonl_source(
     """Load one JSON value per non-empty line."""
     try:
         raw_lines = path.read_text(encoding="utf-8").splitlines()
+    except UnicodeDecodeError as exc:
+        raise AdapterError(f"Cannot decode JSONL source {path} as UTF-8: {exc}") from exc
     except OSError as exc:
         raise AdapterError(f"Cannot read JSONL source {path}: {exc}") from exc
 

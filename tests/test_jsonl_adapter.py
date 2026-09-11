@@ -38,3 +38,14 @@ def test_jsonl_adapter_reports_missing_source(tmp_path: Path) -> None:
         match=r"Cannot read JSONL source .*missing\.jsonl",
     ):
         jsonl_source(path)
+
+
+def test_jsonl_adapter_reports_non_utf8_source(tmp_path: Path) -> None:
+    path = tmp_path / "invalid_utf8.jsonl"
+    path.write_bytes(b'{"id": "1", "input": "\xff\xfe"}\n')
+
+    with pytest.raises(
+        AdapterError,
+        match=r"Cannot decode JSONL source .*invalid_utf8\.jsonl as UTF-8",
+    ):
+        jsonl_source(path)
