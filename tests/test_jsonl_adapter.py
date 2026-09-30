@@ -73,7 +73,7 @@ def test_jsonl_adapter_scalar_records_and_stable_ordered_hashes(tmp_path: Path) 
     path = tmp_path / "scalars.jsonl"
     # Blank lines before, between, and after scalar records (lines 2, 4, 5, 7)
     path.write_text(
-        "\n\"sample string\"\n\n42\ntrue\n\n3.14159\n\n",
+        '\n"sample string"\n\n42\ntrue\n\n3.14159\n\n',
         encoding="utf-8",
     )
 
