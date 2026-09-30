@@ -256,7 +256,7 @@ EvalRepro was created and is maintained by
 [Sevinj Ahmadova](https://github.com/seva9523), whose work focuses on AI evaluation,
 evaluation reproducibility, human-in-the-loop systems, and enterprise AI adoption. Research and
 professional background are available on
-[LinkedIn](https://www.linkedin.com/in/sevinj-ahmadova-imc-240738131/).
+[LinkedIn](https://www.linkedin.com/in/sevinj-ahmadova-240738131/).
 
 Accepted external contributors are credited in the changelog and release notes. Substantive,
 sustained contributors can grow into component-maintainer roles through the governance process.
