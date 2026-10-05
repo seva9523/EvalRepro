@@ -25,7 +25,7 @@ reproducible | order drift | semantic drift
 ```
 
 > **Status:** public alpha. The manifest schema and adapter API may change before v1. Raw evaluation
-> records are never written to a manifest, but hashes are not anonymisation; review the privacy notes
+> records are never written to a manifest, but hashes are not anonymization; review the privacy notes
 > before publishing manifests from sensitive datasets.
 
 ## 30-second terminal demo
