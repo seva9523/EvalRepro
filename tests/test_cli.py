@@ -290,3 +290,48 @@ def test_cli_snapshot_jsonl_invalid_utf8_returns_error(tmp_path: Path, capsys: o
     assert "Cannot decode JSONL source" in stderr
     assert "as UTF-8" in stderr
     assert not output.exists()
+
+
+def test_cli_creates_missing_parent_directories_for_nested_outputs(tmp_path: Path) -> None:
+    source = tmp_path / "source.jsonl"
+    candidate_source = tmp_path / "candidate.jsonl"
+    baseline_manifest = tmp_path / "snapshots" / "baseline" / "manifest.json"
+    candidate_manifest = tmp_path / "snapshots" / "candidate" / "manifest.json"
+    json_report = tmp_path / "reports" / "json" / "report.json"
+    markdown_report = tmp_path / "reports" / "markdown" / "report.md"
+
+    source.write_text('{"id":"1","input":"a","target":"x"}\n', encoding="utf-8")
+    candidate_source.write_text('{"id":"1","input":"a","target":"y"}\n', encoding="utf-8")
+
+    assert not baseline_manifest.parent.exists()
+    assert not candidate_manifest.parent.exists()
+    assert not json_report.parent.exists()
+    assert not markdown_report.parent.exists()
+
+    assert main(["snapshot", "jsonl", str(source), "-o", str(baseline_manifest)]) == 0
+    assert main(["snapshot", "jsonl", str(candidate_source), "-o", str(candidate_manifest)]) == 0
+
+    assert baseline_manifest.parent.is_dir()
+    assert candidate_manifest.parent.is_dir()
+    baseline = read_manifest(baseline_manifest)
+    candidate = read_manifest(candidate_manifest)
+    assert baseline["coverage"]["processed_count"] == 1
+    assert candidate["coverage"]["processed_count"] == 1
+
+    compare_exit = main(
+        [
+            "compare",
+            str(baseline_manifest),
+            str(candidate_manifest),
+            "--json",
+            str(json_report),
+            "--markdown",
+            str(markdown_report),
+        ]
+    )
+
+    assert compare_exit == 2
+    assert json_report.parent.is_dir()
+    assert markdown_report.parent.is_dir()
+    assert json.loads(json_report.read_text(encoding="utf-8"))["verdict"] == "semantic_drift"
+    assert "semantic_drift" in markdown_report.read_text(encoding="utf-8")
