@@ -3,6 +3,8 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
+import pytest
+
 from evalrepro.runtime import discover_git_root, git_state, package_version, runtime_versions
 
 
@@ -14,16 +16,40 @@ def test_package_and_runtime_versions() -> None:
     assert versions["a-distribution-that-does-not-exist-xyz"] is None
 
 
-def test_discover_git_root(tmp_path: Path) -> None:
-    root = tmp_path / "repo"
-    nested = root / "src" / "package"
-    nested.mkdir(parents=True)
-    (root / ".git").mkdir()
-    source = nested / "module.py"
-    source.write_text("pass\n")
+def test_discover_git_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    original_exists = Path.exists
 
-    assert discover_git_root(source) == root
-    assert discover_git_root(tmp_path / "outside") is None
+    def isolated_exists(self: Path) -> bool:
+        if self.name == ".git" and not self.is_relative_to(tmp_path):
+            return False
+        return original_exists(self)
+
+    monkeypatch.setattr(Path, "exists", isolated_exists)
+
+    parent_repo = tmp_path / "parent_repo"
+    parent_repo_src = parent_repo / "src"
+    parent_repo_src.mkdir(parents=True)
+    (parent_repo / ".git").mkdir()
+    parent_source = parent_repo_src / "module.py"
+    parent_source.write_text("pass\n")
+
+    assert discover_git_root(parent_source) == parent_repo
+
+    inner_repo = parent_repo_src / "inner"
+    inner_repo.mkdir()
+    (inner_repo / ".git").mkdir()
+    inner_source = inner_repo / "inner_module.py"
+    inner_source.write_text("pass\n")
+    assert discover_git_root(inner_source) == inner_repo
+
+    worktree_repo = tmp_path / "worktree_repo"
+    worktree_repo.mkdir()
+    (worktree_repo / ".git").write_text("gitdir:/fake/path")
+    worktree_source = worktree_repo / "module.py"
+    worktree_source.write_text("pass\n")
+    assert discover_git_root(worktree_source) == worktree_repo
+
+    assert discover_git_root(tmp_path) is None
 
 
 def test_git_state_none_and_real_repository(tmp_path: Path) -> None:
